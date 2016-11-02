@@ -40,7 +40,7 @@ freely, subject to the following restrictions:
 
 
 static stock
-	TDW_g_sIsOpened@Dialog[MAX_PLAYERS char],
+	bool:TDW_g_sIsOpened@Dialog[MAX_PLAYERS char],
 	TDW_g_sAddresses@Dialog[MAX_PLAYERS];
 
 
@@ -51,32 +51,46 @@ stock
 	_Dialog_Open(playerid, const function[], style, caption[], info[],
 		button1[], button2[] = !"")
 {
-	new func_idx = funcidx(function), addr;
+	new func_idx = funcidx(function);
 
+	// If the function doesn't exist.
+	if (func_idx == -1)
+		return 0;
+
+	new addr;
+
+	// Get the offset to dat, and invert it to get the offset to start of prefix
 	#emit lctrl 1
 	#emit neg
+	// Public function list comes 32 bytes after the start of prefix. Store
+	// the address to the public function list
 	#emit add.c 32
 	#emit stor.s.pri addr
 	#emit lref.s.alt addr
-
+	// Get the pointer to the function at the given index
 	#emit lctrl 1
 	#emit neg
 	#emit add
-	#emit load.s.alt func_idx
+	#emit load.s.alt func_idx // Load the index to alt
 	#emit shl.c.alt 3
 	#emit add
 	#emit stor.s.pri addr
-	#emit lref.s.pri addr
+	#emit lref.s.pri addr // Obtain the address
 	#emit stor.s.pri addr
+
 	#emit push.pri
+
+	// Get the cell address of the array
 	#emit const.alt TDW_g_sAddresses@Dialog
 	#emit load.s.pri playerid
 	#emit idxaddr
-	#emit pop.alt
-	#emit xchg
-	#emit stor.i
 
-	TDW_g_sIsOpened@Dialog{playerid} = 1;
+	#emit pop.alt
+
+	#emit xchg // exchange the values of two registers
+	#emit stor.i // write the value to the array
+
+	TDW_g_sIsOpened@Dialog{playerid} = true;
 
 	ShowPlayerDialog(playerid, TDW_DIALOG_REGISTER_ID, style, caption, info,
 		button1, button2
@@ -89,7 +103,7 @@ stock
 	Dialog_Close(playerid)
 {
 	static space[] = !" ";
-	TDW_g_sIsOpened@Dialog{playerid} = 0;
+	TDW_g_sIsOpened@Dialog{playerid} = false;
 	return ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, space, space,
 		space, space
 	);
@@ -108,11 +122,11 @@ public
 	// static const string_nothing[] = "\1";
 	if (dialogid == TDW_DIALOG_REGISTER_ID)
 	{
-		if (TDW_g_sIsOpened@Dialog{playerid} == 0)
+		if (TDW_g_sIsOpened@Dialog{playerid} == false)
 			return 0;
 		if (inputtext[0] == '\0')
 		{
-			// Push nothing
+			// Push '\0'
 			#emit push.c 0
 		}
 		else
