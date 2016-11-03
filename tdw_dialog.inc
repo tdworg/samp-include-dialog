@@ -119,7 +119,6 @@ forward TDWDH@OnDialogResponse(playerid, dialogid, response, listitem,
 public
 	OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
-	// static const string_nothing[] = "\1";
 	if (dialogid == TDW_DIALOG_REGISTER_ID)
 	{
 		if (TDW_g_sIsOpened@Dialog{playerid} == false)
