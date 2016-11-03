@@ -44,7 +44,7 @@ static stock
 	TDW_g_sAddresses@Dialog[MAX_PLAYERS];
 
 
-#define dialog:%1(%2) forward %1@_wD(%2);public %1@_wD(%2)
+#define dialog%1(%2) forward%1@_wD(%2);public%1@_wD(%2)
 #define Dialog_Open%0(%1,%2,%3,%4,%5,%6) _Dialog_Open(%1,#%2@_wD,%3,%4,%5,%6)
 
 stock
