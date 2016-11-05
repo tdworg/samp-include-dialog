@@ -38,6 +38,10 @@ freely, subject to the following restrictions:
 	#define TDW_DIALOG_REGISTER_ID (32700)
 #endif
 
+#if !defined MAX_FUNCTION_NAME
+	#define MAX_FUNCTION_NAME (32)
+#endif
+
 #if !defined _TDW_FOREACH_MAX_PLAYERS_
 	#if defined GetPlayerPoolSize
 		#define _TDW_FOREACH_MAX_PLAYERS_ (GetPlayerPoolSize() + 1)
@@ -56,7 +60,7 @@ static stock
 
 #define dialog%1(%2) forward %1@_wD(%2);public %1@_wD(%2)
 
-#define Dialog_Open%0(%1,%2,%3,%4,%5,%6) _Dialog_Open(%1,_wD@S:%2$,%3,%4,%5,%6)
+#define OpenDialog%0(%1,%2,%3,%4,%5,%6) _Dialog_Open(%1,_wD@S:%2$,%3,%4,%5,%6)
 
 // Remove the spaces
 #define _wD@S: _wD@S0:_wD@S1:
@@ -282,3 +286,18 @@ public
 #endif
 
 #define OnPlayerConnect TDWDH@OnPlayerConnect
+
+
+
+stock
+	Dialog_Open(playerid, const function_name[], style, caption[], info[],
+		button1[], button2[] = !"")
+{
+	static buffer[MAX_FUNCTION_NAME char];
+	buffer[0] = '\0';
+	strcat(buffer, function_name, sizeof buffer);
+	strcat(buffer, !"@_wD", sizeof buffer);
+	return _Dialog_Open(playerid, buffer, style, caption, info, button1,
+		button2
+	);
+}
