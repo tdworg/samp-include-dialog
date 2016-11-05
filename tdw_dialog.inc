@@ -74,7 +74,7 @@ static stock
 #define CloseDialogForAll%0(%1)\
 	Dialog_CloseForAll(_wD@S:%1$)
 
-#define dialog(%1) _wD@S:%1$
+#define dialog:%1 _wD@S:%1$
 
 
 static stock
