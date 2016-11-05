@@ -56,7 +56,7 @@ static stock
 
 #define dialog%1(%2) forward %1@_wD(%2);public %1@_wD(%2)
 
-#define OpenDialog%0(%1,%2,%3,%4,%5,%6) Dialog_Open(%1,_wD@S:%2$,%3,%4,%5,%6)
+#define Dialog_Open%0(%1,%2,%3,%4,%5,%6) _Dialog_Open(%1,_wD@S:%2$,%3,%4,%5,%6)
 
 // Remove the spaces
 #define _wD@S: _wD@S0:_wD@S1:
@@ -68,13 +68,12 @@ static stock
 #define wD@C0:wD@C1:%0\34;%2\34;%3$ #%2@_wD
 #define wD@C1:%2$ #%2@_wD
 
-#define GetPlayersUsingDialog%0(%1,%2)\
-	Dialog_GetPlayersUsingDialog(_wD@S:%1$,%2)
+#define Dialog_GetPlayersUsingDialog%0(%1,%2)\
+	_Dialog_GetPlayersUsingDialog(_wD@S:%1$,%2)
 
-#define CloseDialogForAll%0(%1)\
-	Dialog_CloseForAll(_wD@S:%1$)
+#define Dialog_CloseForAll%0(%1)\
+	_Dialog_CloseForAll(_wD@S:%1$)
 
-#define dialog(%1) _wD@S:%1$
 
 
 static stock
@@ -115,7 +114,7 @@ static stock
 
 
 stock
-	Dialog_Open(playerid, const function_name[], style, caption[], info[],
+	_Dialog_Open(playerid, const function_name[], style, caption[], info[],
 		button1[], button2[] = !"")
 {
 	new address = GetPublicAddressFromName(function_name);
@@ -146,7 +145,7 @@ stock
 
 
 stock
-	Dialog_GetPlayersUsingDialog(const function_name[], player_list[],
+	_Dialog_GetPlayersUsingDialog(const function_name[], player_list[],
 		size = sizeof player_list)
 {
 	new address = GetPublicAddressFromName(function_name);
@@ -175,7 +174,7 @@ stock
 
 
 stock
-	Dialog_CloseForAll(const function_name[])
+	_Dialog_CloseForAll(const function_name[])
 {
 	new address = GetPublicAddressFromName(function_name);
 
