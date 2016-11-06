@@ -1,6 +1,21 @@
 /** ======================================================================== **\
+	Dialog
+
+| Description:
+Adds dialogs that are not use unique ids. It helps you to make you code more
+readable. Because now you have to use function to get response information.
+
+Example:
+
+dialog SomethingDialog(playerid, response, listitem, inputtext[])
+{
+	// ...
+}
+
+And now you have to use a special functions to show a dialog to the player.
+
 | Version:
-1.0.0
+1.2.0
 
 | License:
 Copyright (c) 2016 Double V
@@ -34,113 +49,56 @@ freely, subject to the following restrictions:
 #define _TDW_DLLIB__DIALOG
 
 
-#if !defined TDW_DIALOG_REGISTER_ID
-	#define TDW_DIALOG_REGISTER_ID (32700)
+#if !defined TDW_DIALOG_ID
+	// This dialog id needs to retrieve data from OnDialogResponse (playerid,
+	// response, listitem, inputtext), and then to send the data to a callback.
+	//
+	// Note:
+	// 32700 is the limit of the dialogs in SA:MP.
+	#define TDW_DIALOG_ID (32700)
+#else
+	#assert (-1 < TDW_DIALOG_ID <= 32700)
 #endif
 
-#if !defined MAX_FUNCTION_NAME
-	#define MAX_FUNCTION_NAME (32)
+#if !defined TDW_MAX_FUNCTION_NAME
+	// The max length of a function name is 31 (without a zero terminator).
+	#define TDW_MAX_FUNCTION_NAME (31)
 #endif
 
-#if !defined _TDW_FOREACH_MAX_PLAYERS_
-	#if defined GetPlayerPoolSize
-		#define _TDW_FOREACH_MAX_PLAYERS_ (GetPlayerPoolSize() + 1)
-	#else
-		#define _TDW_FOREACH_MAX_PLAYERS_ (GetMaxPlayers())
-	#endif
+#if !defined TDW_DIALOG_INVALID_ADDRESS
+	#define TDW_DIALOG_INVALID_ADDRESS (0xffffffff)
 #endif
-
-
 
 static stock
-	bool:TDW_g_sIsOpened@Dialog[MAX_PLAYERS char],
 	TDW_g_sAddresses@Dialog[MAX_PLAYERS];
 
 
-
-#define dialog%1(%2) forward %1@_wD(%2);public %1@_wD(%2)
-
-#define OpenDialog%0(%1,%2,%3,%4,%5,%6) _Dialog_Open(%1,_wD@S:%2$,%3,%4,%5,%6)
-
-// Remove the spaces
-#define _wD@S: _wD@S0:_wD@S1:
-#define _wD@S0:_wD@S1:%0\32;%2$ _wD@S:%2$
-#define _wD@S1:%2$ wD@C:%2$
-
-// Add suffix
-#define wD@C: wD@C0:wD@C1:
-#define wD@C0:wD@C1:%0\34;%2\34;%3$ #%2@_wD
-#define wD@C1:%2$ #%2@_wD
-
-#define Dialog_GetPlayersUsingDialog%0(%1,%2)\
-	_Dialog_GetPlayersUsingDialog(_wD@S:%1$,%2)
-
-#define Dialog_CloseForAll%0(%1)\
-	_Dialog_CloseForAll(_wD@S:%1$)
-
-
-
-static stock
-	GetPublicAddressFromName(const function_name[])
-{
-	new function_index = funcidx(function_name);
-
-	if (function_index == -1)
-	{
-		return -1;
-	}
-	{}
-
-	new addr;
-
-	#emit lctrl 1
-	#emit neg
-
-	#emit add.c 32
-	#emit stor.s.pri addr
-	#emit lref.s.alt addr
-
-	#emit lctrl 1
-	#emit neg
-	#emit add
-	#emit load.s.alt function_index
-	#emit shl.c.alt 3
-	#emit add
-	#emit stor.s.pri addr
-	#emit lref.s.pri addr
-
-	#emit stack 0x8
-	#emit retn
-
-	return 0;
-}
-
+#define dialog:%1(%2) forward _wD@%1(%2);public _wD@%1(%2)
 
 
 stock
-	_Dialog_Open(playerid, const function_name[], style, caption[], info[],
+	Dialog_Open(playerid, const function_name[], style, caption[], info[],
 		button1[], button2[] = !"")
 {
-	new address = GetPublicAddressFromName(function_name);
+	new address = GetDialogPublicAddressFromName(function_name);
 
 	if (address == -1)
 		return 0;
 
 	TDW_g_sAddresses@Dialog[playerid] = address;
-	TDW_g_sIsOpened@Dialog{playerid} = true;
 
-	return ShowPlayerDialog(playerid, TDW_DIALOG_REGISTER_ID, style, caption,
-		info, button1, button2
+	return ShowPlayerDialog(playerid, TDW_DIALOG_ID, style, caption, info,
+		button1, button2
 	);
 }
 
 
 stock
-	Dialog_Close(playerid)
+	Dialog_CloseForPlayer(playerid)
 {
 	static space[] = !" ";
 
-	TDW_g_sIsOpened@Dialog{playerid} = false;
+	TDW_g_sAddresses@Dialog[playerid] = TDW_DIALOG_INVALID_ADDRESS;
 
 	return ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, space, space,
 		space, space
@@ -149,55 +107,56 @@ stock
 
 
 stock
-	_Dialog_GetPlayersUsingDialog(const function_name[], player_list[],
-		size = sizeof player_list)
+	Dialog_CloseForAll(const function_name[])
 {
-	new address = GetPublicAddressFromName(function_name);
+	new address = GetDialogPublicAddressFromName(function_name);
 
 	if (address == -1)
 		return 0;
 
 	new list_index;
 
-	for (new i = _TDW_FOREACH_MAX_PLAYERS_; --i != -1;)
+	for (new i = _TDW_FOREACH_MAX_PLAYERS_; --i != -1; )
 	{
 		if (TDW_g_sAddresses@Dialog[i] != address)
 			continue;
-		if (_:TDW_g_sIsOpened@Dialog{i} == 0)
-			continue;
-		if (list_index >= size)
-			break;
-		player_list[list_index++] = i;
+
+		TDW_g_sAddresses@Dialog[playerid] = TDW_DIALOG_INVALID_ADDRESS;
+
+		ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, space, space,
+			space, space
+		);
 	}
-
-	if (list_index != 0)
-		player_list[list_index] = INVALID_PLAYER_ID;
-
-	return 1;
 }
 
 
 stock
-	_Dialog_CloseForAll(const function_name[])
+	Dialog_GetPlayersUsingDialog(const dialog_name[], list[],
+		size = sizeof list)
 {
-	new address = GetPublicAddressFromName(function_name);
+	new address = GetDialogPublicAddressFromName(function_name);
 
 	if (address == -1)
 		return 0;
 
 	new list_index;
 
-	for (new i = _TDW_FOREACH_MAX_PLAYERS_; --i != -1;)
+	for (new i = _TDW_FOREACH_MAX_PLAYERS_; --i != -1; )
 	{
 		if (TDW_g_sAddresses@Dialog[i] != address)
 			continue;
-		if (_:TDW_g_sIsOpened@Dialog{i} == 0)
-			continue;
-		Dialog_Close(i);
+		if (list_index >= size)
+			break;
+		list[list_index++] = i;
 	}
+
+	if (list_index != 0)
+		list[list_index] = INVALID_PLAYER_ID;
 
 	return 1;
 }
+
+
 
 
 
@@ -209,14 +168,10 @@ forward TDWDH@OnDialogResponse(playerid, dialogid, response, listitem,
 public
 	OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
-	if (dialogid == TDW_DIALOG_REGISTER_ID)
+	if (dialogid == TDW_DIALOG_ID)
 	{
-		if (_:TDW_g_sIsOpened@Dialog{playerid} == 0)
+		if (TDW_g_sAddresses@Dialog[playerid] == TDW_DIALOG_INVALID_ADDRESS)
 			return 0;
-		else
-		{
-			Dialog_Close(playerid);
-		}
 
 		if (inputtext[0] == '\0')
 		{
@@ -270,7 +225,7 @@ forward TDWDH@OnPlayerConnect(playerid);
 public
 	OnPlayerConnect(playerid)
 {
-	TDW_g_sIsOpened@Dialog{playerid} = false;
+	TDW_g_sAddresses@Dialog[playerid] = TDW_DIALOG_INVALID_ADDRESS;
 	return
 	#if defined TDWDH@OnPlayerConnect
 		TDWDH@OnPlayerConnect(playerid);
@@ -289,15 +244,42 @@ public
 
 
 
-stock
-	Dialog_Open(playerid, const function_name[], style, caption[], info[],
-		button1[], button2[] = !"")
+static stock
+	GetDialogPublicAddressFromName(const function_name[])
 {
-	static buffer[MAX_FUNCTION_NAME char];
-	buffer[0] = '\0';
-	strcat(buffer, function_name, sizeof buffer);
-	strcat(buffer, !"@_wD", sizeof buffer);
-	return _Dialog_Open(playerid, buffer, style, caption, info, button1,
-		button2
-	);
+	static fn_name[TDW_MAX_FUNCTION_NAME + 1 char];
+	fn_name =  !"_wD@";
+
+	strcat(fn_name, function_name, sizeof fn_name);
+
+	new function_index = funcidx(fn_name);
+
+	if (function_index == -1)
+	{
+		return -1;
+	}
+	{}
+
+	new addr;
+
+	#emit lctrl 1
+	#emit neg
+
+	#emit add.c 32
+	#emit stor.s.pri addr
+	#emit lref.s.alt addr
+
+	#emit lctrl 1
+	#emit neg
+	#emit add
+	#emit load.s.alt function_index
+	#emit shl.c.alt 3
+	#emit add
+	#emit stor.s.pri addr
+	#emit lref.s.pri addr
+
+	#emit stack 0x8
+	#emit retn
+
+	return 0;
 }
