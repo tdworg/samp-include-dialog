@@ -85,12 +85,12 @@ freely, subject to the following restrictions:
 #define D@AN:%2[%3]%0$) %2)
 
 
-#define dtempl%1(%2) @dT_%1(%2);@dT_%1(%2)
+#define dtempl%1(%2) forward pdT_%1(%2);public pdT_%1(%2)
 #define dfunc:%1, #%1,
 
 
 // -----------------------------------------------------------------------------
-// Functions
+// Vars
 // -----------------------------------------------------------------------------
 
 static stock
