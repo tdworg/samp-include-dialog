@@ -86,6 +86,8 @@ freely, subject to the following restrictions:
 
 
 #define dtempl%1(%2) forward pdT_%1(%2);public pdT_%1(%2)
+#define pdT_%0\32;%1(%2) pdT_%0%1(%2)
+
 #define dfunc:%1, #%1,
 
 
@@ -132,6 +134,16 @@ stock
 		ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, __space, __space,
 			__space, __space
 		);
+}
+
+
+stock
+	Dialog_Show(playerid, const template_name[])
+{
+	new function_name[TDW_MAX_FUNCTION_NAME char] = !"pdT_";
+	strcat(function_name, template_name);
+
+	return CallLocalFunction(function_name, !"d", playerid);
 }
 
 
