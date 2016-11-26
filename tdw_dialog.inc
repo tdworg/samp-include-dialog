@@ -12,10 +12,17 @@ dialog SomethingDialog(playerid, response, listitem, inputtext[])
 	// ...
 }
 
+or use that (if example == true / false):
+
+dialog SomethingDialog <true> (playerid, listitem, inputtext[])
+{
+	// ...
+}
+
 And now you have to use a special functions to show a dialog to the player.
 
 | Version:
-1.2.0
+2.0.0
 
 | License:
 Copyright (c) 2016 Double V
@@ -48,16 +55,14 @@ freely, subject to the following restrictions:
 
 #define _TDW_DLLIB__DIALOG
 
+// -----------------------------------------------------------------------------
+// Default constants
+// -----------------------------------------------------------------------------
 
 #if !defined TDW_DIALOG_ID
-	// This dialog id needs to retrieve data from OnDialogResponse (playerid,
-	// response, listitem, inputtext), and then to send the data to a callback.
-	//
-	// Note:
-	// 32700 is the limit of the dialogs in SA:MP.
-	#define TDW_DIALOG_ID (32700)
+	#define TDW_DIALOG_ID (32767)
 #else
-	#assert (-1 < TDW_DIALOG_ID <= 32700)
+	#assert (-1 < TDW_DIALOG_ID <= 32767)
 #endif
 
 #if !defined TDW_MAX_FUNCTION_NAME
@@ -65,147 +70,95 @@ freely, subject to the following restrictions:
 	#define TDW_MAX_FUNCTION_NAME (31)
 #endif
 
-#if !defined TDW_DIALOG_INVALID_ADDRESS
-	#define TDW_DIALOG_INVALID_ADDRESS (0xffffffff)
-#endif
+// -----------------------------------------------------------------------------
+// Macros
+// -----------------------------------------------------------------------------
+
+#define dialog%1(%2) DPARSE(%1<>%2)
+
+#define DPARSE(%1<%3>%2) forward pdR_%1(playerid,response,listitem,inputtext[]);public pdR_%1(playerid,response,listitem,inputtext[]){return g@R(%3,%1,response)(%2)
+#define g@R(%3,%1,%4)(%2) _:D@A0:D@A1:%1$%2$%3$%4$
+#define D@A0:D@A1:%1$%2$$%4$ _dR_%1(D@AN:%2[]$);}stock _dR_%1(%2)
+#define D@A1:%1$<>%2$%3$%4$ (_:(%3)==%4)?_dR_%1(D@AN:%2[]$):0;}stock _dR_%1(%2)
+#define pdR_%0\32;%1(%2) pdR_%0%1(%2)
+#define _dR_%0\32;%1(%2) _dR_%0%1(%2)
+#define D@AN:%2[%3]%0$) %2)
+
+
+#define dtempl%1(%2) @dT_%1(%2);@dT_%1(%2)
+#define dfunc:%1, #%1,
+
+
+// -----------------------------------------------------------------------------
+// Functions
+// -----------------------------------------------------------------------------
 
 static stock
-	TDW_g_sAddresses@Dialog[MAX_PLAYERS];
+	TDW_g_sDialog@FuncName[MAX_PLAYERS][TDW_MAX_FUNCTION_NAME char],
+	TDW_g_sSpecifier@ddds[] = !"ddds";
 
 
-#define dialog:%1(%2) forward _wD@%1(%2);public _wD@%1(%2)
+// -----------------------------------------------------------------------------
+// Functions
+// -----------------------------------------------------------------------------
 
 
 stock
-	Dialog_Open(playerid, const function_name[], style, caption[], info[],
-		button1[], button2[] = !"")
+	Dialog_Open(playerid, const dialog_response[], style, caption[], info[],
+		button[], button1[] = !"\0")
 {
-	new address = GetDialogPublicAddressFromName(function_name);
-
-	if (address == -1)
-		return 0;
-
-	TDW_g_sAddresses@Dialog[playerid] = address;
+	TDW_g_sDialog@FuncName[playerid] = !"pdR_";
+	strcat(TDW_g_sDialog@FuncName[playerid], dialog_response);
 
 	return ShowPlayerDialog(playerid, TDW_DIALOG_ID, style, caption, info,
-		button1, button2
+		button, button1
 	);
 }
 
 
 stock
-	Dialog_CloseForPlayer(playerid)
+	Dialog_Close(playerid)
 {
-	static space[] = !" ";
-
-	TDW_g_sAddresses@Dialog[playerid] = TDW_DIALOG_INVALID_ADDRESS;
-
-	return ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, space, space,
-		space, space
-	);
-}
-
-
-stock
-	Dialog_CloseForAll(const function_name[])
-{
-	new address = GetDialogPublicAddressFromName(function_name);
-
-	if (address == -1)
-		return 0;
-
-	new list_index;
-
-	for (new i = _TDW_FOREACH_MAX_PLAYERS_; --i != -1; )
-	{
-		if (TDW_g_sAddresses@Dialog[i] != address)
-			continue;
-
-		TDW_g_sAddresses@Dialog[playerid] = TDW_DIALOG_INVALID_ADDRESS;
-
-		ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, space, space,
-			space, space
+	static __space[] = !" ";
+	TDW_g_sDialog@FuncName[playerid]{0} = '\0';
+	return
+		ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, __space, __space,
+			__space, __space
 		);
-	}
 }
 
 
-stock
-	Dialog_GetPlayersUsingDialog(const dialog_name[], list[],
-		size = sizeof list)
-{
-	new address = GetDialogPublicAddressFromName(function_name);
+// -----------------------------------------------------------------------------
+// Internal
+// -----------------------------------------------------------------------------
 
-	if (address == -1)
-		return 0;
-
-	new list_index;
-
-	for (new i = _TDW_FOREACH_MAX_PLAYERS_; --i != -1; )
-	{
-		if (TDW_g_sAddresses@Dialog[i] != address)
-			continue;
-		if (list_index >= size)
-			break;
-		list[list_index++] = i;
-	}
-
-	if (list_index != 0)
-		list[list_index] = INVALID_PLAYER_ID;
-
-	return 1;
-}
-
-
-
-
-
-#if defined TDWDH@OnDialogResponse
-forward TDWDH@OnDialogResponse(playerid, dialogid, response, listitem,
-	inputtext[]);
-#endif
-
+// OnDialogResponse hook
 public
 	OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
 	if (dialogid == TDW_DIALOG_ID)
 	{
-		if (TDW_g_sAddresses@Dialog[playerid] == TDW_DIALOG_INVALID_ADDRESS)
-			return 0;
-
 		if (inputtext[0] == '\0')
 		{
-			// Push '\0'
-			#emit push.c 0
+			CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
+				TDW_g_sSpecifier@ddds, playerid, response, listitem, !"\1"
+			);
 		}
 		else
 		{
-			// Push the string
-			#emit push.s inputtext
+			CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
+				TDW_g_sSpecifier@ddds, playerid, response, listitem,
+				inputtext
+			);
 		}
-
-		#emit push.s listitem
-		#emit push.s response
-		#emit push.s playerid
-		#emit push.c 16
-
-		#emit lctrl 6
-		#emit add.c 40
-		#emit push.pri
-		// Call the function
-		#emit const.alt TDW_g_sAddresses@Dialog
-		#emit load.s.pri playerid
-		#emit lidx
-		#emit sctrl 6
 	}
-
 	return
 	#if defined TDWDH@OnDialogResponse
 		TDWDH@OnDialogResponse(playerid, dialogid, response, listitem,
 			inputtext
 		);
 	#else
-		1; // Return 1;
+		1; // return 1;
 	#endif
 }
 
@@ -217,69 +170,8 @@ public
 
 #define OnDialogResponse TDWDH@OnDialogResponse
 
-
-#if defined TDWDH@OnPlayerConnect
-forward TDWDH@OnPlayerConnect(playerid);
+#if defined TDWDH@OnDialogResponse
+	forward TDWDH@OnDialogResponse(playerid, dialogid, response, listitem,
+		inputtext[]);
 #endif
 
-public
-	OnPlayerConnect(playerid)
-{
-	TDW_g_sAddresses@Dialog[playerid] = TDW_DIALOG_INVALID_ADDRESS;
-	return
-	#if defined TDWDH@OnPlayerConnect
-		TDWDH@OnPlayerConnect(playerid);
-	#else
-		1; // Return 1;
-	#endif
-}
-
-#if defined _ALS_OnPlayerConnect
-	#undef OnPlayerConnect
-#else
-	#define _ALS_OnPlayerConnect
-#endif
-
-#define OnPlayerConnect TDWDH@OnPlayerConnect
-
-
-
-static stock
-	GetDialogPublicAddressFromName(const function_name[])
-{
-	static fn_name[TDW_MAX_FUNCTION_NAME + 1 char];
-	fn_name =  !"_wD@";
-
-	strcat(fn_name, function_name, sizeof fn_name);
-
-	new function_index = funcidx(fn_name);
-
-	if (function_index == -1)
-	{
-		return -1;
-	}
-	{}
-
-	new addr;
-
-	#emit lctrl 1
-	#emit neg
-
-	#emit add.c 32
-	#emit stor.s.pri addr
-	#emit lref.s.alt addr
-
-	#emit lctrl 1
-	#emit neg
-	#emit add
-	#emit load.s.alt function_index
-	#emit shl.c.alt 3
-	#emit add
-	#emit stor.s.pri addr
-	#emit lref.s.pri addr
-
-	#emit stack 0x8
-	#emit retn
-
-	return 0;
-}
