@@ -95,6 +95,7 @@ freely, subject to the following restrictions:
 
 static stock
 	TDW_g_sDialog@FuncName[MAX_PLAYERS][TDW_MAX_FUNCTION_NAME char],
+	bool:TDW_g_sDialog@IsOpen[MAX_PLAYERS char],
 	TDW_g_sSpecifier@ddds[] = !"ddds";
 
 
@@ -110,9 +111,12 @@ stock
 	TDW_g_sDialog@FuncName[playerid] = !"pdR_";
 	strcat(TDW_g_sDialog@FuncName[playerid], dialog_response);
 
-	return ShowPlayerDialog(playerid, TDW_DIALOG_ID, style, caption, info,
-		button, button1
-	);
+	TDW_g_sDialog@IsOpen{playerid} = true;
+
+	return
+		ShowPlayerDialog(playerid, TDW_DIALOG_ID, style, caption, info,
+			button, button1
+		);
 }
 
 
@@ -120,11 +124,21 @@ stock
 	Dialog_Close(playerid)
 {
 	static __space[] = !" ";
+
 	TDW_g_sDialog@FuncName[playerid]{0} = '\0';
+	TDW_g_sDialog@IsOpen{playerid} = false;
+
 	return
 		ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, __space, __space,
 			__space, __space
 		);
+}
+
+
+stock
+	IsPlayerInDialog(playerid)
+{
+	return _:TDW_g_sDialog@IsOpen{playerid};
 }
 
 
@@ -138,18 +152,21 @@ public
 {
 	if (dialogid == TDW_DIALOG_ID)
 	{
-		if (inputtext[0] == '\0')
+		if (_:TDW_g_sDialog@IsOpen{playerid})
 		{
-			CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
-				TDW_g_sSpecifier@ddds, playerid, response, listitem, !"\1"
-			);
-		}
-		else
-		{
-			CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
-				TDW_g_sSpecifier@ddds, playerid, response, listitem,
-				inputtext
-			);
+			if (inputtext[0] == '\0')
+			{
+				CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
+					TDW_g_sSpecifier@ddds, playerid, response, listitem, !"\1"
+				);
+			}
+			else
+			{
+				CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
+					TDW_g_sSpecifier@ddds, playerid, response, listitem,
+					inputtext
+				);
+			}
 		}
 	}
 	return
