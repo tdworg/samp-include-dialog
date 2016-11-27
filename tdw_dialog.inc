@@ -143,16 +143,51 @@ stock
 	new function_name[TDW_MAX_FUNCTION_NAME char] = !"pdT_";
 	strcat(function_name, template_name);
 
-	return CallLocalFunction(function_name, !"d", playerid);
+	return
+		CallLocalFunction(function_name, !"d", playerid);
 }
 
 
 stock
 	IsPlayerInDialog(playerid)
 {
-	return _:TDW_g_sDialog@IsOpen{playerid};
+	return TDW_g_sDialog@IsOpen{playerid};
 }
 
+
+stock
+	GetPlayerUsingDialog(const dialog_name[], player_list[],
+		size = sizeof player_list)
+{
+	new list_id, func_name[TDW_MAX_FUNCTION_NAME + 1 char] = !"pdR_";
+	strcat(func_name, dialog_name);
+
+	#if defined foreach
+		foreach (new i: Player)
+	#else
+		for (
+		#if defined GetPlayerPoolSize
+			new i = GetPlayerPoolSize() + 1;
+		#else
+			new i = MAX_PLAYERS;
+		#endif
+			--i != -1;
+		)
+	#endif
+	{
+		if (_:TDW_g_sDialog@IsOpen{i} == 0)
+			continue;
+		if (strcmp(TDW_g_sDialog@FuncName[i], func_name, true) != 0)
+			continue;
+		if (list_id >= size)
+			break;
+		player_list[list_id++] = i;
+	}
+	if (list_id != 0)
+		player_list[list_id] = INVALID_PLAYER_ID;
+
+	return 1;
+}
 
 // -----------------------------------------------------------------------------
 // Internal
