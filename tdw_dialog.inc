@@ -218,6 +218,15 @@ public
 			}
 			else
 			{
+				new len = strlen(inputtext);
+
+				while (len != 0)
+				{
+					if (inputtext[len] == '%')
+						inputtext[len] = '#';
+					len--;
+				}
+
 				ret = CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
 					TDW_g_sSpecifier@ddds, playerid, response, listitem,
 					inputtext
