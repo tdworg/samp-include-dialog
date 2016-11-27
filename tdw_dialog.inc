@@ -12,7 +12,7 @@ dialog SomethingDialog(playerid, response, listitem, inputtext[])
 	// ...
 }
 
-or use that (if example == true / false):
+or use that (if response == true / false):
 
 dialog SomethingDialog <true> (playerid, listitem, inputtext[])
 {
