@@ -95,10 +95,18 @@ freely, subject to the following restrictions:
 // Vars
 // -----------------------------------------------------------------------------
 
+enum
+	E_TDW_DIALOG_CALLBACKS (<<= 1)
+{
+	EI_CB_OnDialogPerformed
+};
+
 static stock
 	TDW_g_sDialog@FuncName[MAX_PLAYERS][TDW_MAX_FUNCTION_NAME char],
 	bool:TDW_g_sDialog@IsOpen[MAX_PLAYERS char],
-	TDW_g_sSpecifier@ddds[] = !"ddds";
+	TDW_g_sSpecifier@ddds[] = !"ddds",
+	E_TDW_DIALOG_CALLBACKS:TDW_g_sCallbacks,
+	TDW_g_sOnDialogPerformed[] = !"OnDialogPerformed";
 
 
 // -----------------------------------------------------------------------------
@@ -199,19 +207,27 @@ public
 {
 	if (dialogid == TDW_DIALOG_ID)
 	{
-		if (_:TDW_g_sDialog@IsOpen{playerid})
+		if (TDW_g_sDialog@IsOpen{playerid})
 		{
+			static ret;
 			if (inputtext[0] == '\0')
 			{
-				CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
+				ret = CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
 					TDW_g_sSpecifier@ddds, playerid, response, listitem, !"\1"
 				);
 			}
 			else
 			{
-				CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
+				ret = CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
 					TDW_g_sSpecifier@ddds, playerid, response, listitem,
 					inputtext
+				);
+			}
+			if (TDW_g_sCallbacks & EI_CB_OnDialogPerformed)
+			{
+				CallLocalFunction(TDW_g_sOnDialogPerformed, !"isii",
+					playerid, TDW_g_sDialog@FuncName[playerid], response,
+					ret
 				);
 			}
 		}
@@ -239,3 +255,63 @@ public
 		inputtext[]);
 #endif
 
+
+#if defined FILTERSCRIPT
+	public
+		OnFilterScriptInit()
+	{
+
+		if (funcidx(TDW_g_sOnDialogPerformed) != -1)
+		{
+			TDW_g_sCallbacks |= EI_CB_OnDialogPerformed;
+		}
+
+		return
+		#if defined TDWDH@OnFilterScriptInit
+			TDWDH@OnFilterScriptInit();
+		#else
+			1;
+		#endif
+	}
+
+	#if defined _ALS_OnFilterScriptInit
+		#undef OnFilterScriptInit
+	#else
+		#define _ALS_OnFilterScriptInit
+	#endif
+
+	#define OnFilterScriptInit TDWDH@OnFilterScriptInit
+
+	#if defined TDWDH@OnFilterScriptInit
+		forward TDWDH@OnFilterScriptInit();
+	#endif
+#else
+	public
+		OnGameModeInit()
+	{
+
+		if (funcidx(TDW_g_sOnDialogPerformed) != -1)
+		{
+			TDW_g_sCallbacks |= EI_CB_OnDialogPerformed;
+		}
+
+		return
+		#if defined TDWDH@OnGameModeInit
+			TDWDH@OnGameModeInit();
+		#else
+			1;
+		#endif
+	}
+
+	#if defined _ALS_OnGameModeInit
+		#undef OnGameModeInit
+	#else
+		#define _ALS_OnGameModeInit
+	#endif
+
+	#define OnGameModeInit TDWDH@OnGameModeInit
+
+	#if defined TDWDH@OnGameModeInit
+		forward TDWDH@OnGameModeInit();
+	#endif
+#endif
