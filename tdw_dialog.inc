@@ -234,9 +234,10 @@ public
 			}
 			if (TDW_g_sCallbacks & EI_CB_OnDialogPerformed)
 			{
+				static dialog_name[TDW_MAX_FUNCTION_NAME];
+				strunpack(dialog_name, TDW_g_sDialog@FuncName[playerid]);
 				CallLocalFunction(TDW_g_sOnDialogPerformed, !"isii",
-					playerid, TDW_g_sDialog@FuncName[playerid], response,
-					ret
+					playerid, dialog_name, response, ret
 				);
 			}
 		}
@@ -324,3 +325,8 @@ public
 		forward TDWDH@OnGameModeInit();
 	#endif
 #endif
+
+
+forward OnDialogPerformed(playerid, const dialog_name[], response,
+	bool:success
+);
