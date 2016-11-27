@@ -22,7 +22,7 @@ dialog SomethingDialog <true> (playerid, listitem, inputtext[])
 And now you have to use a special functions to show a dialog to the player.
 
 | Version:
-2.0.7
+2.0.8
 
 | License:
 Copyright (c) 2016 Double V
