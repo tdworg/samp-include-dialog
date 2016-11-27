@@ -21,7 +21,7 @@ dialog PlayerReg<true>(playerid, inputtext[])
 
 dtempl PlayerReg(playerid)
 {
-	Dialog_Open(playerid, dfucn:PlayerReg, DIALOG_STYLE_MSGBOX, "Cap",
+	Dialog_Open(playerid, dfunc:PlayerReg, DIALOG_STYLE_MSGBOX, "Cap",
 		"Info", "Button"
 	);
 }
