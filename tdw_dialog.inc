@@ -197,6 +197,41 @@ stock
 	return 1;
 }
 
+
+stock
+	Dialog_CloseForAll(const dialog_name[])
+{
+	static __space[] = !" ";
+	new func_name[TDW_MAX_FUNCTION_NAME + 1 char] = !"pdR_";
+	strcat(func_name, dialog_name);
+
+	#if defined foreach
+		foreach (new i: Player)
+	#else
+		for (
+		#if defined GetPlayerPoolSize
+			new i = GetPlayerPoolSize() + 1;
+		#else
+			new i = MAX_PLAYERS;
+		#endif
+			--i != -1;
+		)
+	#endif
+	{
+		if (_:TDW_g_sDialog@IsOpen{i} == 0)
+			continue;
+		if (strcmp(TDW_g_sDialog@FuncName[i], func_name, true) != 0)
+			continue;
+
+		TDW_g_sDialog@FuncName[i]{0} = '\0';
+		TDW_g_sDialog@IsOpen{i} = false;
+
+		ShowPlayerDialog(i, -1, DIALOG_STYLE_MSGBOX, __space, __space,
+			__space, __space
+		);
+	}
+}
+
 // -----------------------------------------------------------------------------
 // Internal
 // -----------------------------------------------------------------------------
