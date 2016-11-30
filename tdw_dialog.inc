@@ -301,6 +301,34 @@ public
 #endif
 
 
+// OnPlayerDisconnect hook
+public
+	OnPlayerDisconnect(playerid, reason)
+{
+	#pragma unused reason
+	Dialog_Close(playerid);
+	return
+	#if defined TDWDH@OnPlayerDisconnect
+		TDWDH@OnPlayerDisconnect(playerid, reason);
+	#else
+		1; // return 1;
+	#endif
+}
+
+#if defined _ALS_OnPlayerDisconnect
+	#undef OnPlayerDisconnect
+#else
+	#define _ALS_OnPlayerDisconnect
+#endif
+
+#define OnPlayerDisconnect TDWDH@OnPlayerDisconnect
+
+#if defined TDWDH@OnPlayerDisconnect
+	forward TDWDH@OnPlayerDisconnect(playerid, reason);
+#endif
+
+
+// OnFilterScriptInit/OnGameModeInit hook
 #if defined FILTERSCRIPT
 	public
 		OnFilterScriptInit()
