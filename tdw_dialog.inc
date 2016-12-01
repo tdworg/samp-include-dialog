@@ -106,7 +106,8 @@ static stock
 	bool:TDW_g_sDialog@IsOpen[MAX_PLAYERS char],
 	TDW_g_sSpecifier@ddds[] = !"ddds",
 	E_TDW_DIALOG_CALLBACKS:TDW_g_sCallbacks,
-	TDW_g_sOnDialogPerformed[] = !"OnDialogPerformed";
+	TDW_g_sOnDialogPerformed[] = !"OnDialogPerformed",
+	TDW_g_sSpace[] = !" ";
 
 
 // -----------------------------------------------------------------------------
@@ -133,14 +134,12 @@ stock
 stock
 	Dialog_Close(playerid)
 {
-	static __space[] = !" ";
-
 	TDW_g_sDialog@FuncName[playerid]{0} = '\0';
 	TDW_g_sDialog@IsOpen{playerid} = false;
 
 	return
-		ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, __space, __space,
-			__space, __space
+		ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace,
+			TDW_g_sSpac, TDW_g_sSpace, TDW_g_sSpace
 		);
 }
 
@@ -201,7 +200,6 @@ stock
 stock
 	Dialog_CloseForAll(const dialog_name[])
 {
-	static __space[] = !" ";
 	new func_name[TDW_MAX_FUNCTION_NAME + 1 char] = !"pdR_";
 	strcat(func_name, dialog_name);
 
@@ -226,8 +224,8 @@ stock
 		TDW_g_sDialog@FuncName[i]{0} = '\0';
 		TDW_g_sDialog@IsOpen{i} = false;
 
-		ShowPlayerDialog(i, -1, DIALOG_STYLE_MSGBOX, __space, __space,
-			__space, __space
+		ShowPlayerDialog(i, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace, TDW_g_sSpace,
+			TDW_g_sSpace, TDW_g_sSpace
 		);
 	}
 }
