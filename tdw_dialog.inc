@@ -139,7 +139,7 @@ stock
 
 	return
 		ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace,
-			TDW_g_sSpac, TDW_g_sSpace, TDW_g_sSpace
+			TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace
 		);
 }
 
