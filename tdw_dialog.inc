@@ -107,7 +107,8 @@ static stock
 	TDW_g_sSpecifier@ddds[] = !"ddds",
 	E_TDW_DIALOG_CALLBACKS:TDW_g_sCallbacks,
 	TDW_g_sOnDialogPerformed[] = !"OnDialogPerformed",
-	TDW_g_sSpace[] = !" ";
+	TDW_g_sSpace[] = !" ",
+	TDW_g_sPrefix@pdR_[]= !"pdR_";
 
 
 // -----------------------------------------------------------------------------
@@ -119,7 +120,7 @@ stock
 	Dialog_Open(playerid, const dialog_response[], style, caption[], info[],
 		button[], button1[] = !"\0")
 {
-	TDW_g_sDialog@FuncName[playerid] = !"pdR_";
+	TDW_g_sDialog@FuncName[playerid] = TDW_g_sPrefix@pdR_;
 	strcat(TDW_g_sDialog@FuncName[playerid], dialog_response);
 
 	TDW_g_sDialog@IsOpen{playerid} = true;
@@ -166,7 +167,7 @@ stock
 	GetPlayerUsingDialog(const dialog_name[], player_list[],
 		size = sizeof player_list)
 {
-	new list_id, func_name[TDW_MAX_FUNCTION_NAME + 1 char] = !"pdR_";
+	new list_id, func_name[TDW_MAX_FUNCTION_NAME + 1 char] = TDW_g_sPrefix@pdR_;
 	strcat(func_name, dialog_name);
 
 	#if defined foreach
@@ -200,7 +201,7 @@ stock
 stock
 	Dialog_CloseForAll(const dialog_name[])
 {
-	new func_name[TDW_MAX_FUNCTION_NAME + 1 char] = !"pdR_";
+	new func_name[TDW_MAX_FUNCTION_NAME + 1 char] = TDW_g_sPrefix@pdR_;
 	strcat(func_name, dialog_name);
 
 	#if defined foreach
