@@ -76,14 +76,18 @@ freely, subject to the following restrictions:
 
 #define dialog%1(%2) DPARSE(%1<>%2)
 
-#define DPARSE(%1<%3>%2) forward pdR_%1(playerid,response,listitem,inputtext[]);public pdR_%1(playerid,response,listitem,inputtext[]){return g@R(%3,%1,response)(%2)
-#define g@R(%3,%1,%4)(%2) _:D@A0:D@A1:%1$%2$%3$%4$
-#define D@A0:D@A1:%1$%2$$%4$ _dR_%1(D@AN:%2[]$);}stock _dR_%1(%2)
-#define D@A1:%1$<>%2$%3$%4$ (_:(%3)==%4)?_dR_%1(D@AN:%2[]$):0;}stock _dR_%1(%2)
-#define pdR_%0\32;%1(%2) pdR_%0%1(%2)
-#define _dR_%0\32;%1(%2) _dR_%0%1(%2)
-#define D@AN:%2[%3]%0$) %2)
-
+#if !defined TDW_DIALOG_FAST_MODE
+	#define DPARSE(%1<%3>%2) forward pdR_%1(playerid,response,listitem,inputtext[]);public pdR_%1(playerid,response,listitem,inputtext[]){return g@R(%3,%1,response)(%2)
+	#define g@R(%3,%1,%4)(%2) _:D@A0:D@A1:%1$%2$%3$%4$
+	#define D@A0:D@A1:%1$%2$$%4$ _dR_%1(D@AN:%2[]$);}stock _dR_%1(%2)
+	#define D@A1:%1$<>%2$%3$%4$ (_:(%3)==%4)?_dR_%1(D@AN:%2[]$):0;}stock _dR_%1(%2)
+	#define pdR_%0\32;%1(%2) pdR_%0%1(%2)
+	#define _dR_%0\32;%1(%2) _dR_%0%1(%2)
+	#define D@AN:%2[%3]%0$) %2)
+#else
+	#define DPARSE(%1<>%2) forward pdR_%1(playerid,response,listitem,inputtext[]);public pdR_%1(playerid,response,listitem,inputtext[])
+	#define pdR_%0\32;%1(%2) pdR_%0%1(%2)
+#endif
 
 #define dtempl%1(%2) forward pdT_%1(%2);public pdT_%1(%2)
 #define pdT_%0\32;%1(%2) pdT_%0%1(%2)
