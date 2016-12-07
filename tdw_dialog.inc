@@ -256,14 +256,16 @@ public
 			}
 			else
 			{
-				new len = strlen(inputtext);
+				#if defined TDW_DIALOG_PROTECT_INPUT
+					new len = strlen(inputtext);
 
-				while (len != 0)
-				{
-					if (inputtext[len] == '%')
-						inputtext[len] = '#';
-					len--;
-				}
+					while (len != 0)
+					{
+						if (inputtext[len] == '%')
+							inputtext[len] = '#';
+						len--;
+					}
+				#endif
 
 				ret = CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
 					TDW_g_sSpecifier@ddds, playerid, response, listitem,
