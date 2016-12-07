@@ -70,6 +70,18 @@ freely, subject to the following restrictions:
 	#define TDW_MAX_FUNCTION_NAME (31)
 #endif
 
+#if !defined TDW_DIALOG_MAX_CAPTION
+	#define TDW_DIALOG_MAX_CAPTION (64)
+#endif
+
+#if !defined TDW_DIALOG_MAX_INFO
+	#define TDW_DIALOG_MAX_INFO (4096)
+#endif
+
+#if !defined TDW_DIALOG_MAX_INPUT_TEXT
+	#define TDW_DIALOG_MAX_INPUT_TEXT (128)
+#endif
+
 // -----------------------------------------------------------------------------
 // Macros
 // -----------------------------------------------------------------------------
