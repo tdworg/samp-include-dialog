@@ -22,7 +22,7 @@ dialog SomethingDialog <true> (playerid, listitem, inputtext[])
 And now you have to use a special functions to show a dialog to the player.
 
 | Version:
-2.0.14
+2.0.15
 
 | License:
 Copyright (c) 2016 Double V
@@ -86,25 +86,35 @@ freely, subject to the following restrictions:
 // Macros
 // -----------------------------------------------------------------------------
 
-#define dialog%1(%2) DPARSE(%1<>%2)
-
 #if !defined TDW_DIALOG_FAST_MODE
-	#define DPARSE(%1<%3>%2) forward pdR_%1(playerid,response,listitem,inputtext[]);public pdR_%1(playerid,response,listitem,inputtext[]){return g@R(%3,%1,response)(%2)
-	#define g@R(%3,%1,%4)(%2) _:D@A0:D@A1:%1$%2$%3$%4$
-	#define D@A0:D@A1:%1$%2$$%4$ _dR_%1(D@AN:%2[]$);}stock _dR_%1(%2)
-	#define D@A1:%1$<>%2$%3$%4$ (_:(%3)==%4)?_dR_%1(D@AN:%2[]$):0;}stock _dR_%1(%2)
-	#define pdR_%0\32;%1(%2) pdR_%0%1(%2)
-	#define _dR_%0\32;%1(%2) _dR_%0%1(%2)
-	#define D@AN:%2[%3]%0$) %2)
+	#define u@$ 0]);
+	#define __:%0$ u@(u[_:%0 u@$
+
+	#define dialog%1(%2) dlg@r(%1<>%2)
+
+	#define dlg@h: __:dlg@h1:dlg@h2:$
+
+	#define dlg@r(%1<%3>%2) dlg@h:%1(%2)(%3)
+	#define dlg@h1:dlg@h2:%8$%1[%4]%0(%2)(%3) %8$public dR_%1(playerid,response,listitem,inputtext[])<dialog_state:%4>{return dlg@a(%1_%4,%3,response)(%2)
+	#define dlg@h2:%8$%1(%2)(%3) %8$forward dR_%1(playerid,response,listitem,inputtext[]);public dR_%1(playerid,response,listitem,inputtext[])<dialog_state:default_dialog_state>{return dlg@a(%1,%3,response)(%2)
+
+	#define dlg@a(%1,%3,%4)(%2) _:dlg@a1:dlg@a2:%1$%2$%3$%4$
+	#define dlg@a1:dlg@a2:%1$%2$$%4$ dC_%1(dlg@tN:%2[]$);}stock dC_%1(%2)
+	#define dlg@a2:%1$<>%2$%3$%4$ (_:(%3)==%4)?dC_%1(dlg@tN:%2[]$):0;}stock dC_%1(%2)
+
+	#define dlg@tN:%2[%3]%0$) %2)
+
+	#define dR_%0\32%1(%2) dR_%0%1(%2)
+	#define dC_%0\32%1(%2) dC_%0%1(%2)
 #else
-	#define DPARSE(%1<>%2) forward pdR_%1(playerid,response,listitem,inputtext[]);public pdR_%1(playerid,response,listitem,inputtext[])
-	#define pdR_%0\32;%1(%2) pdR_%0%1(%2)
+	#define dialog%1(%2) forward dR_%1(playerid,response,listitem,inputtext[]);public dR_%1(playerid,response,listitem,inputtext[])
+	#define dR_%0\32;%1(%2) dR_%0%1(%2)
 #endif
 
 #define dtempl%1(%2) forward pdT_%1(%2);public pdT_%1(%2)
 #define pdT_%0\32;%1(%2) pdT_%0%1(%2)
 
-#define dfunc:%1, #%1,
+#define dfunc:%1) #%1)
 
 
 // -----------------------------------------------------------------------------
@@ -124,7 +134,7 @@ static stock
 	E_TDW_DIALOG_CALLBACKS:TDW_g_sCallbacks,
 	TDW_g_sOnDialogPerformed[] = !"OnDialogPerformed",
 	TDW_g_sSpace[] = !" ",
-	TDW_g_sPrefix@pdR_[]= !"pdR_";
+	TDW_g_sPrefix@dR_[]= !"dR_";
 
 
 // -----------------------------------------------------------------------------
@@ -136,7 +146,7 @@ stock
 	Dialog_Open(playerid, const dialog_response[], style, caption[], info[],
 		button[], button1[] = !"\0")
 {
-	TDW_g_sDialog@FuncName[playerid] = TDW_g_sPrefix@pdR_;
+	TDW_g_sDialog@FuncName[playerid] = TDW_g_sPrefix@dR_;
 	strcat(TDW_g_sDialog@FuncName[playerid], dialog_response);
 
 	TDW_g_sDialog@IsOpen{playerid} = true;
@@ -183,7 +193,7 @@ stock
 	GetPlayerUsingDialog(const dialog_name[], player_list[],
 		size = sizeof player_list)
 {
-	new list_id, func_name[TDW_MAX_FUNCTION_NAME + 1 char] = TDW_g_sPrefix@pdR_;
+	new list_id, func_name[TDW_MAX_FUNCTION_NAME + 1 char] = TDW_g_sPrefix@dR_;
 	strcat(func_name, dialog_name);
 
 	#if defined foreach
@@ -217,7 +227,7 @@ stock
 stock
 	Dialog_CloseForAll(const dialog_name[])
 {
-	new func_name[TDW_MAX_FUNCTION_NAME + 1 char] = TDW_g_sPrefix@pdR_;
+	new func_name[TDW_MAX_FUNCTION_NAME + 1 char] = TDW_g_sPrefix@dR_;
 	strcat(func_name, dialog_name);
 
 	#if defined foreach
