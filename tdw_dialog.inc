@@ -22,7 +22,7 @@ dialog SomethingDialog <true> (playerid, listitem, inputtext[])
 And now you have to use a special functions to show a dialog to the player.
 
 | Version:
-2.0.15
+2.0.15.1
 
 | License:
 Copyright (c) 2016 Double V
@@ -148,13 +148,10 @@ stock
 {
 	TDW_g_sDialog@FuncName[playerid] = TDW_g_sPrefix@dR_;
 	strcat(TDW_g_sDialog@FuncName[playerid], dialog_response);
-
 	TDW_g_sDialog@IsOpen{playerid} = true;
-
-	return
-		ShowPlayerDialog(playerid, TDW_DIALOG_ID, style, caption, info,
-			button, button1
-		);
+	return ShowPlayerDialog(playerid, TDW_DIALOG_ID, style, caption, info,
+		button, button1
+	);
 }
 
 
@@ -163,11 +160,9 @@ stock
 {
 	TDW_g_sDialog@FuncName[playerid]{0} = '\0';
 	TDW_g_sDialog@IsOpen{playerid} = false;
-
-	return
-		ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace,
-			TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace
-		);
+	return ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace,
+		TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace
+	);
 }
 
 
@@ -176,9 +171,7 @@ stock
 {
 	new function_name[TDW_MAX_FUNCTION_NAME char] = !"pdT_";
 	strcat(function_name, template_name);
-
-	return
-		CallLocalFunction(function_name, !"d", playerid);
+	return CallLocalFunction(function_name, !"d", playerid);
 }
 
 
@@ -219,7 +212,6 @@ stock
 	}
 	if (list_id != 0)
 		player_list[list_id] = INVALID_PLAYER_ID;
-
 	return 1;
 }
 
@@ -229,7 +221,6 @@ stock
 {
 	new func_name[TDW_MAX_FUNCTION_NAME + 1 char] = TDW_g_sPrefix@dR_;
 	strcat(func_name, dialog_name);
-
 	#if defined foreach
 		foreach (new i: Player)
 	#else
@@ -247,10 +238,8 @@ stock
 			continue;
 		if (strcmp(TDW_g_sDialog@FuncName[i], func_name, true) != 0)
 			continue;
-
 		TDW_g_sDialog@FuncName[i]{0} = '\0';
 		TDW_g_sDialog@IsOpen{i} = false;
-
 		ShowPlayerDialog(i, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace, TDW_g_sSpace,
 			TDW_g_sSpace, TDW_g_sSpace
 		);
@@ -265,19 +254,15 @@ stock
 public
 	OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
-	if (dialogid == TDW_DIALOG_ID)
-	{
-		if (TDW_g_sDialog@IsOpen{playerid})
-		{
+	static dialog_name[TDW_MAX_FUNCTION_NAME];
+	if (dialogid == TDW_DIALOG_ID) {
+		if (TDW_g_sDialog@IsOpen{playerid}) {
 			static ret;
-			if (inputtext[0] == '\0')
-			{
+			if (inputtext[0] == '\0') {
 				ret = CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
 					TDW_g_sSpecifier@ddds, playerid, response, listitem, !"\1"
 				);
-			}
-			else
-			{
+			} else {
 				#if defined TDW_DIALOG_PROTECT_INPUT
 					new len = strlen(inputtext);
 
@@ -288,18 +273,23 @@ public
 						len--;
 					}
 				#endif
-
 				ret = CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
 					TDW_g_sSpecifier@ddds, playerid, response, listitem,
 					inputtext
 				);
 			}
-			if (TDW_g_sCallbacks & EI_CB_OnDialogPerformed)
-			{
-				static dialog_name[TDW_MAX_FUNCTION_NAME];
+			if (TDW_g_sCallbacks & EI_CB_OnDialogPerformed) {
 				strunpack(dialog_name, TDW_g_sDialog@FuncName[playerid]);
 				CallLocalFunction(TDW_g_sOnDialogPerformed, !"isii",
 					playerid, dialog_name, response, ret
+				);
+			}
+			TDW_g_sDialog@IsOpen{playerid} = false;
+		} else {
+			if (TDW_g_sCallbacks & EI_CB_OnDialogPerformed) {
+				strunpack(dialog_name, TDW_g_sDialog@FuncName[playerid]);
+				CallLocalFunction(TDW_g_sOnDialogPerformed, !"isii",
+					playerid, dialog_name, 0xffffffff, ret
 				);
 			}
 		}
@@ -360,12 +350,9 @@ public
 	public
 		OnFilterScriptInit()
 	{
-
-		if (funcidx(TDW_g_sOnDialogPerformed) != -1)
-		{
+		if (funcidx(TDW_g_sOnDialogPerformed) != -1) {
 			TDW_g_sCallbacks |= EI_CB_OnDialogPerformed;
 		}
-
 		return
 		#if defined TDWDH@OnFilterScriptInit
 			TDWDH@OnFilterScriptInit();
@@ -389,12 +376,9 @@ public
 	public
 		OnGameModeInit()
 	{
-
-		if (funcidx(TDW_g_sOnDialogPerformed) != -1)
-		{
+		if (funcidx(TDW_g_sOnDialogPerformed) != -1) {
 			TDW_g_sCallbacks |= EI_CB_OnDialogPerformed;
 		}
-
 		return
 		#if defined TDWDH@OnGameModeInit
 			TDWDH@OnGameModeInit();
