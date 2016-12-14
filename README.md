@@ -14,21 +14,40 @@ Dialogs!
 
 Example:
 ```pawn
-dialog PlayerReg<true>(playerid, inputtext[])
+#include <a_samp>
+#include <tdw_dialog>
+
+
+dialog RegisterPlayerDialog(playerid, response, inputtext[])
 {
-	printf("Your text: %s", inputtext[]);
+	if (response) {
+		SendClientMessage(playerid, -1,
+			!"Ок!"
+		);
+	} else {
+		Dialog_Show(playerid, dfunc:RegisterPlayerDialog);
+	}
+	return 1;
 }
 
-dtempl PlayerReg(playerid)
+dtempl RegisterPlayerDialog(playerid)
 {
-	Dialog_Open(playerid, dfunc:PlayerReg, DIALOG_STYLE_MSGBOX, "Cap",
-		"Info", "Button"
+	const SOME_STRING = 50;
+	static buffer[SOME_STRING];
+	GetPlayerName(playerid, buffer, MAX_PLAYER_NAME + 1);
+	format(buffer, sizeof buffer, "Hello! %s", buffer);
+	Dialog_Open(playerid, dfunc:RegisterPlayerDialog, DIALOG_STYLE_INPUT,
+		buffer, !"Ok? or not?",
+		!"Ok!", !"No!"
 	);
+	return 1;
 }
+
 
 public
 	OnPlayerConnect(playerid)
 {
-	Dialog_Show(playerid, "PlayerReg");
+	Dialog_Show(playerid, dfunc:RegisterPlayerDialog);
+	return 1;
 }
 ```
