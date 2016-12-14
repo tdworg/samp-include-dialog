@@ -114,7 +114,7 @@ freely, subject to the following restrictions:
 #define dtempl%1(%2) forward pdT_%1(%2);public pdT_%1(%2)
 #define pdT_%0\32;%1(%2) pdT_%0%1(%2)
 
-#define dfunc:%1) #%1)
+#define dfunc: #
 
 
 // -----------------------------------------------------------------------------
@@ -254,10 +254,11 @@ stock
 public
 	OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
-	static dialog_name[TDW_MAX_FUNCTION_NAME];
+	static
+		dialog_name[TDW_MAX_FUNCTION_NAME],
+		ret;
 	if (dialogid == TDW_DIALOG_ID) {
 		if (TDW_g_sDialog@IsOpen{playerid}) {
-			static ret;
 			if (inputtext[0] == '\0') {
 				ret = CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
 					TDW_g_sSpecifier@ddds, playerid, response, listitem, !"\1"
