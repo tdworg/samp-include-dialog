@@ -12,7 +12,7 @@ Dialogs!
 #include <tdw_dialog>
 ```
 
-Example:
+### Example:
 ```pawn
 #include <a_samp>
 #include <tdw_dialog>
