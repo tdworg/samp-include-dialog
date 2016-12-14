@@ -96,7 +96,7 @@ freely, subject to the following restrictions:
 
 	#define dlg@r(%1<%3>%2) dlg@h:%1(%2)(%3)
 	#define dlg@h1:dlg@h2:%8$%1[%4]%0(%2)(%3) %8$public dR_%1(playerid,response,listitem,inputtext[])<dialog_state:%4>{return dlg@a(%1_%4,%3,response)(%2)
-	#define dlg@h2:%8$%1(%2)(%3) %8$forward dR_%1(playerid,response,listitem,inputtext[]);public dR_%1(playerid,response,listitem,inputtext[])<dialog_state:default_dialog_state>{return dlg@a(%1,%3,response)(%2)
+	#define dlg@h2:%8$%1(%2)(%3) %8$forward public dR_%1(playerid,response,listitem,inputtext[]);public dR_%1(playerid,response,listitem,inputtext[])<>{return 0;}public dR_%1(playerid,response,listitem,inputtext[])<dialog_state:default_state>{return dlg@a(%1,%3,response)(%2)
 
 	#define dlg@a(%1,%3,%4)(%2) _:dlg@a1:dlg@a2:%1$%2$%3$%4$
 	#define dlg@a1:dlg@a2:%1$%2$$%4$ dC_%1(dlg@tN:%2[]$);}stock dC_%1(%2)
@@ -116,7 +116,6 @@ freely, subject to the following restrictions:
 
 #define dfunc: #
 
-
 // -----------------------------------------------------------------------------
 // Vars
 // -----------------------------------------------------------------------------
@@ -124,7 +123,7 @@ freely, subject to the following restrictions:
 enum
 	E_TDW_DIALOG_CALLBACKS (<<= 1)
 {
-	EI_CB_OnDialogPerformed
+	EI_CB_OnDialogPerformed = 1
 };
 
 static stock
@@ -351,6 +350,7 @@ public
 	public
 		OnFilterScriptInit()
 	{
+		state dialog_state:default_state;
 		if (funcidx(TDW_g_sOnDialogPerformed) != -1) {
 			TDW_g_sCallbacks |= EI_CB_OnDialogPerformed;
 		}
@@ -377,6 +377,7 @@ public
 	public
 		OnGameModeInit()
 	{
+		state dialog_state:default_state;
 		if (funcidx(TDW_g_sOnDialogPerformed) != -1) {
 			TDW_g_sCallbacks |= EI_CB_OnDialogPerformed;
 		}
