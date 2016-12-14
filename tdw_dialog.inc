@@ -249,28 +249,30 @@ stock
 
 
 stock
-	Dialog_MessageBox(playerid, const caption[], const info[], const button1[],
-		const button2[] = !"\0")
+	Dialog_MessageBox(playerid, caption[], info[], button1[], button2[] = !"\0")
 {
-	static const __message_box[] = !"Message";
-	// emit doesn't support (value).
-	const DIALOG_STYLE_MSGBOX_PRE = DIALOG_STYLE_MSGBOX;
-	// arguments
-	#emit push.s button2
-	#emit push.s button1
-	#emit push.s info
-	#emit push.s caption
-	#emit push.c DIALOG_STYLE_MSGBOX_PRE
-	#emit push.c __message_box
-	#emit push.s playerid
-	#emit push.c 28
-	// ... and Dialog_Open
-	#emit call Dialog_Open
-	// Restore the stack
-	#emit stack 32
-	// Return the value
-	#emit retn
-	return 0; // Make compile happy!
+	// For the constant arguments.
+	// static const __message_box[] = !"Message";
+	// // emit doesn't support (value).
+	// const DIALOG_STYLE_MSGBOX_PRE = DIALOG_STYLE_MSGBOX;
+	// // arguments
+	// #emit push.s button2
+	// #emit push.s button1
+	// #emit push.s info
+	// #emit push.s caption
+	// #emit push.c DIALOG_STYLE_MSGBOX_PRE
+	// #emit push.c __message_box
+	// #emit push.s playerid
+	// #emit push.c 28
+	// // ... and Dialog_Open
+	// #emit call Dialog_Open
+	// // Restore the stack
+	// #emit stack 32
+	// // Return the value
+	// #emit retn
+	return Dialog_Open(playerid, dfunc:Message, DIALOG_STYLE_MSGBOX, caption,
+		info, button1, button2
+	);
 }
 
 // -----------------------------------------------------------------------------
