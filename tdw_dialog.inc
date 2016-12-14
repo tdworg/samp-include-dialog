@@ -82,6 +82,8 @@ freely, subject to the following restrictions:
 	#define TDW_DIALOG_MAX_INPUT_TEXT (128)
 #endif
 
+#define DIALOG_PLAYER_USE_DIALOG_HIDER (0xffffffff)
+
 // -----------------------------------------------------------------------------
 // Macros
 // -----------------------------------------------------------------------------
@@ -315,7 +317,7 @@ public
 			if (TDW_g_sCallbacks & EI_CB_OnDialogPerformed) {
 				strunpack(dialog_name, TDW_g_sDialog@FuncName[playerid]);
 				CallLocalFunction(TDW_g_sOnDialogPerformed, !"isii",
-					playerid, dialog_name, 0xffffffff, ret
+					playerid, dialog_name, DIALOG_PLAYER_USE_DIALOG_HIDER, ret
 				);
 			}
 		}
