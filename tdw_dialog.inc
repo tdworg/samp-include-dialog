@@ -2,27 +2,12 @@
 	Dialog
 
 | Description:
-Adds dialogs that are not use unique ids. It helps you to make you code more
-readable. Because now you have to use function to get response information.
-
-Example:
-
-dialog SomethingDialog(playerid, response, listitem, inputtext[])
-{
-	// ...
-}
-
-or use that (if response == true / false):
-
-dialog SomethingDialog <true> (playerid, listitem, inputtext[])
-{
-	// ...
-}
-
-And now you have to use a special functions to show a dialog to the player.
+A library with the new syntax for working with dialogs outside of
+OnDialogResponse. Besides, the library have functions that can be help in
+a script.
 
 | Version:
-2.0.16.6
+3.0.0
 
 | License:
 Copyright (c) 2016 Double V
@@ -55,66 +40,46 @@ freely, subject to the following restrictions:
 
 #define _TDW_DLLIB__DIALOG
 
+forward OnDialogPerformed(playerid, const dialog_name[], response,
+	bool:success
+);
+
 // -----------------------------------------------------------------------------
-// Default constants
+// Constant
 // -----------------------------------------------------------------------------
+
+#define TDW_MAX_FUNCTION_NAME (31)
+#define TDW_DIALOG_PLAYER_DIALOG_HIDER (0xffffffff)
 
 #if !defined TDW_DIALOG_ID
 	#define TDW_DIALOG_ID (32767)
 #else
-	#assert (-1 < TDW_DIALOG_ID <= 32767)
+	#assert (0 <= TDW_DIALOG_ID <= 32767)
 #endif
-
-#if !defined TDW_MAX_FUNCTION_NAME
-	// The max length of a function name is 31 (without a zero terminator).
-	#define TDW_MAX_FUNCTION_NAME (31)
-#endif
-
-#if !defined TDW_DIALOG_MAX_CAPTION
-	#define TDW_DIALOG_MAX_CAPTION (64)
-#endif
-
-#if !defined TDW_DIALOG_MAX_INFO
-	#define TDW_DIALOG_MAX_INFO (4096)
-#endif
-
-#if !defined TDW_DIALOG_MAX_INPUT_TEXT
-	#define TDW_DIALOG_MAX_INPUT_TEXT (128)
-#endif
-
-#define DIALOG_PLAYER_USE_DIALOG_HIDER (0xffffffff)
 
 // -----------------------------------------------------------------------------
-// Macros
+// Template
 // -----------------------------------------------------------------------------
 
-#if !defined TDW_DIALOG_FAST_MODE
-	#define u@$ 0]);
-	#define __:%0$ u@(u[_:%0 u@$
+#define u@$ 0]);
+#define __:%0$ u@(u[_:%0 u@$
 
-	#define dialog%1(%2) dlg@r(%1<>%2)
+#define dialog%1(%2) dlg@r(%1,%2)
 
-	#define dlg@h: __:dlg@h1:dlg@h2:$
+#define dlg@r(%1,%2) dlg@s:%1(%2)
+#define dlg@s: __:dlg@s1:dlg@s2:$
+// with automatons
+#define dlg@s1:dlg@s2:%8$%1[%3]%0(%2) %8$public dR@%1(playerid,response,listitem,inputtext[])<dialogState:%3>{return dC@%1_%3(dlg@tN:%2[]$);}stock dC@%1_%3(%2)
+// without automatons
+#define dlg@s2:%8$%1(%2) %8$forward dR@%1(playerid,response,listitem,inputtext[]);public dR@%1(playerid,response,listitem,inputtext[])<>return 0;public dR@%1(playerid,response,listitem,inputtext[])<dialogState:default_state>{return dC@%1(dlg@tN:%2[]$);}stock dC@%1(%2)
+// delete spaces.
+#define dR@%8\32%1(%2) dR@%8%1(%2)
+#define dC@%8\32%1(%2) dC@%8%1(%2)
+// delete [] from arguments.
+#define dlg@tN:%2[%3]%0$) %2)
 
-	#define dlg@r(%1<%3>%2) dlg@h:%1(%2)(%3)
-	#define dlg@h1:dlg@h2:%8$%1[%4]%0(%2)(%3) %8$public dR_%1(playerid,response,listitem,inputtext[])<dialog_state:%4>{return dlg@a(%1_%4,%3,response)(%2)
-	#define dlg@h2:%8$%1(%2)(%3) %8$forward public dR_%1(playerid,response,listitem,inputtext[]);public dR_%1(playerid,response,listitem,inputtext[])<>{return 0;}public dR_%1(playerid,response,listitem,inputtext[])<dialog_state:default_state>{return dlg@a(%1,%3,response)(%2)
-
-	#define dlg@a(%1,%3,%4)(%2) _:dlg@a1:dlg@a2:%1$%2$%3$%4$
-	#define dlg@a1:dlg@a2:%1$%2$$%4$ dC_%1(dlg@tN:%2[]$);}stock dC_%1(%2)
-	#define dlg@a2:%1$<>%2$%3$%4$ (_:(%3)==%4)?dC_%1(dlg@tN:%2[]$):0;}stock dC_%1(%2)
-
-	#define dlg@tN:%2[%3]%0$) %2)
-
-	#define dR_%0\32%1(%2) dR_%0%1(%2)
-	#define dC_%0\32%1(%2) dC_%0%1(%2)
-#else
-	#define dialog%1(%2) forward dR_%1(playerid,response,listitem,inputtext[]);public dR_%1(playerid,response,listitem,inputtext[])
-	#define dR_%0\32;%1(%2) dR_%0%1(%2)
-#endif
-
-#define dtempl%1(%2) forward pdT_%1(%2);public pdT_%1(%2)
-#define pdT_%0\32;%1(%2) pdT_%0%1(%2)
+#define dtempl%1(%2) forward dT@%1(%2);public dT@%1(%2)
+#define dT@%0\32;%1(%2) dT@%0%1(%2)
 
 #define dfunc: #
 
@@ -122,161 +87,18 @@ freely, subject to the following restrictions:
 // Vars
 // -----------------------------------------------------------------------------
 
-enum
-	E_TDW_DIALOG_CALLBACKS (<<= 1)
-{
-	EI_CB_OnDialogPerformed = 1
-};
-
 static stock
-	TDW_g_sDialog@FuncName[MAX_PLAYERS][TDW_MAX_FUNCTION_NAME char],
-	bool:TDW_g_sDialog@IsOpen[MAX_PLAYERS char],
+	TDW_g_sDialog@CallbackName[MAX_PLAYERS][TDW_MAX_FUNCTION_NAME char],
+	bool:TDW_g_sDialog@IsAlreadyOpen[MAX_PLAYERS char],
 	TDW_g_sSpecifier@ddds[] = !"ddds",
-	E_TDW_DIALOG_CALLBACKS:TDW_g_sCallbacks,
-	TDW_g_sOnDialogPerformed[] = !"OnDialogPerformed",
+	TDW_g_sSpecifier@isii[] = !"isii",
+	TDW_g_sCallbacks,
+	TDW_g_sOnDialogPerformed[] = "OnDialogPerformed",
 	TDW_g_sSpace[] = !" ",
-	TDW_g_sPrefix@dR_[]= !"dR_";
-
-
-// -----------------------------------------------------------------------------
-// Functions
-// -----------------------------------------------------------------------------
-
-
-stock
-	Dialog_Open(playerid, const dialog_response[], style, caption[], info[],
-		button[], button1[] = !"\0")
-{
-	TDW_g_sDialog@FuncName[playerid] = TDW_g_sPrefix@dR_;
-	strcat(TDW_g_sDialog@FuncName[playerid], dialog_response);
-	TDW_g_sDialog@IsOpen{playerid} = true;
-	return ShowPlayerDialog(playerid, TDW_DIALOG_ID, style, caption, info,
-		button, button1
-	);
-}
-
-
-stock
-	Dialog_Close(playerid)
-{
-	TDW_g_sDialog@FuncName[playerid]{0} = '\0';
-	TDW_g_sDialog@IsOpen{playerid} = false;
-	return ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace,
-		TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace
-	);
-}
-
-
-stock
-	Dialog_Show(playerid, const template_name[])
-{
-	new function_name[TDW_MAX_FUNCTION_NAME char] = !"pdT_";
-	strcat(function_name, template_name);
-	return CallLocalFunction(function_name, !"d", playerid);
-}
-
-
-stock
-	IsPlayerInDialog(playerid)
-{
-	return TDW_g_sDialog@IsOpen{playerid};
-}
-
-
-stock
-	GetPlayerUsingDialog(const dialog_name[], player_list[],
-		size = sizeof player_list)
-{
-	new list_id, func_name[TDW_MAX_FUNCTION_NAME + 1 char] = TDW_g_sPrefix@dR_;
-	strcat(func_name, dialog_name);
-
-	#if defined foreach
-		foreach (new i: Player)
-	#else
-		for (
-		#if defined GetPlayerPoolSize
-			new i = GetPlayerPoolSize() + 1;
-		#else
-			new i = MAX_PLAYERS;
-		#endif
-			--i != -1;
-		)
-	#endif
-	{
-		if (_:TDW_g_sDialog@IsOpen{i} == 0)
-			continue;
-		if (strcmp(TDW_g_sDialog@FuncName[i], func_name, true) != 0)
-			continue;
-		if (list_id >= size)
-			break;
-		player_list[list_id++] = i;
-	}
-	if (list_id != 0)
-		player_list[list_id] = INVALID_PLAYER_ID;
-	return 1;
-}
-
-
-stock
-	Dialog_CloseForAll(const dialog_name[])
-{
-	new func_name[TDW_MAX_FUNCTION_NAME + 1 char] = TDW_g_sPrefix@dR_;
-	strcat(func_name, dialog_name);
-	#if defined foreach
-		foreach (new i: Player)
-	#else
-		for (
-		#if defined GetPlayerPoolSize
-			new i = GetPlayerPoolSize() + 1;
-		#else
-			new i = MAX_PLAYERS;
-		#endif
-			--i != -1;
-		)
-	#endif
-	{
-		if (_:TDW_g_sDialog@IsOpen{i} == 0)
-			continue;
-		if (strcmp(TDW_g_sDialog@FuncName[i], func_name, true) != 0)
-			continue;
-		TDW_g_sDialog@FuncName[i]{0} = '\0';
-		TDW_g_sDialog@IsOpen{i} = false;
-		ShowPlayerDialog(i, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace, TDW_g_sSpace,
-			TDW_g_sSpace, TDW_g_sSpace
-		);
-	}
-}
-
-
-stock
-	Dialog_MessageBox(playerid, caption[], info[], button1[], button2[] = !"\0")
-{
-	// For the constant arguments.
-	// static const __message_box[] = !"Message";
-	// // emit doesn't support (value).
-	// const DIALOG_STYLE_MSGBOX_PRE = DIALOG_STYLE_MSGBOX;
-	// // arguments
-	// #emit push.s button2
-	// #emit push.s button1
-	// #emit push.s info
-	// #emit push.s caption
-	// #emit push.c DIALOG_STYLE_MSGBOX_PRE
-	// #emit push.c __message_box
-	// #emit push.s playerid
-	// #emit push.c 28
-	// // ... and Dialog_Open
-	// #emit call Dialog_Open
-	// // Restore the stack
-	// #emit stack 32
-	// // Return the value
-	// #emit retn
-	return Dialog_Open(playerid, dfunc:Message, DIALOG_STYLE_MSGBOX, caption,
-		info, button1, button2
-	);
-}
+	TDW_g_sPrefix@dR@= !"dR@";
 
 // -----------------------------------------------------------------------------
-// Internal
+// Hooks
 // -----------------------------------------------------------------------------
 
 // OnDialogResponse hook
@@ -284,42 +106,43 @@ public
 	OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
 	static
-		dialog_name[TDW_MAX_FUNCTION_NAME],
+		callback_name[TDW_MAX_FUNCTION_NAME],
 		ret;
 	if (dialogid == TDW_DIALOG_ID) {
-		if (TDW_g_sDialog@IsOpen{playerid}) {
+		if (TDW_g_sDialog@IsAlreadyOpen{playerid}) {
 			if (inputtext[0] == '\0') {
-				ret = CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
+				// Call the function without inputtext.
+				ret = CallLocalFunction(TDW_g_sDialog@CallbackName[playerid],
 					TDW_g_sSpecifier@ddds, playerid, response, listitem, !"\1"
 				);
 			} else {
 				#if defined TDW_DIALOG_PROTECT_INPUT
-					new len = strlen(inputtext);
-
-					while (len != 0)
-					{
-						if (inputtext[len] == '%')
-							inputtext[len] = '#';
-						len--;
-					}
+					new inputtext_len = strlen(inputtext);
+					do {
+						if (inputtext[inputtext_len] == '%')
+							inputtext[inputtext_len] = '#';
+					} while (--inputtext_len != 0);
 				#endif
-				ret = CallLocalFunction(TDW_g_sDialog@FuncName[playerid],
+				// Call the function with inputtext.
+				ret = CallLocalFunction(TDW_g_sDialog@CallbackName[playerid],
 					TDW_g_sSpecifier@ddds, playerid, response, listitem,
 					inputtext
 				);
 			}
-			if (TDW_g_sCallbacks & EI_CB_OnDialogPerformed) {
-				strunpack(dialog_name, TDW_g_sDialog@FuncName[playerid]);
-				CallLocalFunction(TDW_g_sOnDialogPerformed, !"isii",
-					playerid, dialog_name, response, ret
+			if (TDW_g_sCallbacks & 1) {
+				strunpack(callback_name, TDW_g_sDialog@CallbackName[playerid]);
+				CallLocalFunction(TDW_g_sOnDialogPerformed,
+					TDW_g_sSpecifier@isii, playerid, callback_name, response,
+					ret
 				);
 			}
-			TDW_g_sDialog@IsOpen{playerid} = false;
+			TDW_g_sDialog@IsAlreadyOpen{playerid} = false;
 		} else {
-			if (TDW_g_sCallbacks & EI_CB_OnDialogPerformed) {
-				strunpack(dialog_name, TDW_g_sDialog@FuncName[playerid]);
-				CallLocalFunction(TDW_g_sOnDialogPerformed, !"isii",
-					playerid, dialog_name, DIALOG_PLAYER_USE_DIALOG_HIDER, ret
+			if (TDW_g_sCallbacks & 1) {
+				strunpack(callback_name, TDW_g_sDialog@CallbackName[playerid]);
+				CallLocalFunction(TDW_g_sOnDialogPerformed,
+					TDW_g_sSpecifier@isii, playerid, callback_name, response,
+					TDW_DIALOG_PLAYER_DIALOG_HIDER
 				);
 			}
 		}
@@ -330,7 +153,7 @@ public
 			inputtext
 		);
 	#else
-		1; // return 1;
+		1;
 	#endif
 }
 
@@ -347,7 +170,6 @@ public
 		inputtext[]);
 #endif
 
-
 // OnPlayerDisconnect hook
 public
 	OnPlayerDisconnect(playerid, reason)
@@ -358,7 +180,7 @@ public
 	#if defined TDWDH@OnPlayerDisconnect
 		TDWDH@OnPlayerDisconnect(playerid, reason);
 	#else
-		1; // return 1;
+		1;
 	#endif
 }
 
@@ -374,16 +196,14 @@ public
 	forward TDWDH@OnPlayerDisconnect(playerid, reason);
 #endif
 
-
 // OnFilterScriptInit/OnGameModeInit hook
 #if defined FILTERSCRIPT
 	public
 		OnFilterScriptInit()
 	{
-		state dialog_state:default_state;
-		if (funcidx(TDW_g_sOnDialogPerformed) != -1) {
-			TDW_g_sCallbacks |= EI_CB_OnDialogPerformed;
-		}
+		state dialogState:default_state;
+		if (funcidx(TDW_g_sOnDialogPerformed) != -1)
+			TDW_g_sCallbacks |= 1;
 		return
 		#if defined TDWDH@OnFilterScriptInit
 			TDWDH@OnFilterScriptInit();
@@ -407,10 +227,9 @@ public
 	public
 		OnGameModeInit()
 	{
-		state dialog_state:default_state;
-		if (funcidx(TDW_g_sOnDialogPerformed) != -1) {
-			TDW_g_sCallbacks |= EI_CB_OnDialogPerformed;
-		}
+		state dialogState:default_state;
+		if (funcidx(TDW_g_sOnDialogPerformed) != -1)
+			TDW_g_sCallbacks |= 1;
 		return
 		#if defined TDWDH@OnGameModeInit
 			TDWDH@OnGameModeInit();
@@ -432,7 +251,81 @@ public
 	#endif
 #endif
 
+// -----------------------------------------------------------------------------
+// Workaround
+// -----------------------------------------------------------------------------
 
-forward OnDialogPerformed(playerid, const dialog_name[], response,
-	bool:success
-);
+@_TDW_DLLIB__DIALOG_@();
+@_TDW_DLLIB__DIALOG_@()
+{
+	#emit retn
+	ShowPlayerDialog(0, 0, 0, TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace,
+		TDW_g_sSpace
+	);
+}
+
+static stock TDW_DLLIB__AUTOMANTON()<>{return 0;}
+static stock TDW_DLLIB__AUTOMANTON()<dialogState:default_state>{return 0;}
+
+// -----------------------------------------------------------------------------
+// Functions
+// -----------------------------------------------------------------------------
+
+stock
+	Dialog_Open(playerid, const function_response[], style, const caption[],
+		const info[], const button1[], const button2[] = !"\0")
+{
+	TDW_g_sDialog@CallbackName[playerid] = TDW_g_sPrefix@dR@;
+	strcat(TDW_g_sDialog@CallbackName[playerid], function_response);
+	TDW_g_sDialog@IsAlreadyOpen{playerid} = true;
+	// All of string arguments in ShowPlayerDialog should be defined with
+	// a 'const' qualifier.
+	const TDW_DIALOG_ID_ND = TDW_DIALOG_ID;
+	#emit push.s button2
+	#emit push.s button1
+	#emit push.s info
+	#emit push.s caption
+	#emit push.s style
+	#emit push.c TDW_DIALOG_ID_ND
+	#emit push.s playerid
+	#emit push.c 28
+	#emit sysreq.c ShowPlayerDialog
+	#emit stack 32
+	#emit retn
+	return 0; // Make compile happy!
+}
+
+stock
+	Dialog_Close(playerid)
+{
+	TDW_g_sDialog@CallbackName[playerid]{0} = '\0';
+	TDW_g_sDialog@IsAlreadyOpen{playerid} = false;
+	return ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace,
+		TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace
+	);
+}
+
+stock
+	Dialog_Show(playerid, const template_name[])
+{
+	static function_name[TDW_MAX_FUNCTION_NAME char];
+	function_name = !"dT@";
+	strcat(function_name, template_name);
+	return CallLocalFunction(function_name, !"d", playerid);
+}
+
+stock
+	IsPlayerInDialog(playerid)
+{
+	return TDW_g_sDialog@IsAlreadyOpen{playerid};
+}
+
+stock
+	Dialog_MessageBox(playerid, const caption[], const info[], const button1[],
+		const button2[] = !"\0")
+{
+	static const __message_box_name[] = !"Message";
+	return Dialog_Open(playerid, __message_box_name, DIALOG_STYLE_MSGBOX,
+		caption, info, button1, button2
+	);
+}
