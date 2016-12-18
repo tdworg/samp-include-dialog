@@ -95,7 +95,7 @@ static stock
 	TDW_g_sCallbacks,
 	TDW_g_sOnDialogPerformed[] = "OnDialogPerformed",
 	TDW_g_sSpace[] = !" ",
-	TDW_g_sPrefix@dR@= !"dR@";
+	TDW_g_sPrefix@dR@[] = !"dR@";
 
 // -----------------------------------------------------------------------------
 // Hooks
