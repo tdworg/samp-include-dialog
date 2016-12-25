@@ -110,6 +110,7 @@ public
 		ret;
 	if (dialogid == TDW_DIALOG_ID) {
 		if (TDW_g_sDialog@IsAlreadyOpen{playerid}) {
+			TDW_g_sDialog@IsAlreadyOpen{playerid} = false;
 			if (inputtext[0] == '\0') {
 				// Call the function without inputtext.
 				ret = CallLocalFunction(TDW_g_sDialog@CallbackName[playerid],
@@ -136,7 +137,6 @@ public
 					ret
 				);
 			}
-			TDW_g_sDialog@IsAlreadyOpen{playerid} = false;
 		} else {
 			if (TDW_g_sCallbacks & 1) {
 				strunpack(callback_name, TDW_g_sDialog@CallbackName[playerid]);
