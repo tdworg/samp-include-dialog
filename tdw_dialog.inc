@@ -7,7 +7,7 @@ OnDialogResponse. Besides, the library have functions that can be help in
 a script.
 
 | Version:
-3.0.0
+3.0.1
 
 | License:
 Copyright (c) 2016 Double V
