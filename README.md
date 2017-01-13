@@ -51,3 +51,7 @@ public
 	return 1;
 }
 ```
+
+### Branching
+
+#![Branching](doc/img/branching.png)
