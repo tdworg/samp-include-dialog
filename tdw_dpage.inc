@@ -48,22 +48,26 @@ static stock
 	TDW_g_sPlayerInDPage[MAX_PLAYERS] = TDW_INVALID_DIALOG_PAGE,
 	TDW_g_sPlayer@DialogName[MAX_PLAYERS][TDW_MAX_FUNC_NAME char];
 
-stock DialogPage_Open(playerid, const dialog_name[])
+stock DialogPage_Open(playerid, const dialog_name[], start_index = 0)
 {
 	if (TDW_g_sPlayerInDPage[playerid] != TDW_INVALID_DIALOG_PAGE)
 		return 0;
 
-	TDW_g_sPlayerInDPage[playerid] = 0;
+	TDW_g_sPlayerInDPage[playerid] = start_index;
 
 	// Store the name without tags in the array.
 	TDW_g_sPlayer@DialogName[playerid][0] = EOS;
 	strcat(TDW_g_sPlayer@DialogName[playerid], dialog_name, TDW_MAX_FUNC_NAME);
 
 	// Generate a new name for the template.
-	static func_name[TDW_MAX_FUNC_NAME char];
+	static
+		func_name[TDW_MAX_FUNC_NAME char],
+		val_buffer[12 char];
+	valstr(val_buffer, start_index, true);
 	func_name = !"dP@";
 	strcat(func_name, dialog_name, TDW_MAX_FUNC_NAME);
-	strcat(func_name, !"@0");
+	strcat(func_name, !"@");
+	strcat(func_name, val_buffer);
 
 	// Call the function
 	if (CallLocalFunction(func_name, !"d", playerid) == 0)
@@ -102,22 +106,28 @@ stock DialogPage_Clear(playerid)
 	TDW_g_sPlayer@DialogName[playerid]{0} = '\0';
 }
 
-stock DialogPage_Goto(playerid, index)
+stock DialogPage_Goto(playerid, index, const new_dialog_branch[] = !"\0")
 {
 	if (TDW_g_sPlayerInDPage[playerid] == TDW_INVALID_DIALOG_PAGE)
 		return 0;
 
-	TDW_g_sPlayerInDPage[playerid] = index;
-
 	static
 		func_name[TDW_MAX_FUNC_NAME char],
 		val_buffer[12 char];
+
 	valstr(val_buffer, index, true);
 	func_name = !"dP@";
-	strcat(func_name, TDW_g_sPlayer@DialogName[playerid],
-		TDW_MAX_FUNC_NAME);
+	if (IsEmptyString(new_dialog_branch)) {
+		strcat(func_name, TDW_g_sPlayer@DialogName[playerid],
+			TDW_MAX_FUNC_NAME);
+	} else {
+		strcat(func_name, new_dialog_branch, TDW_MAX_FUNC_NAME);
+		strcpy(TDW_g_sPlayer@DialogName[playerid], new_dialog_branch);
+	}
 	strcat(func_name, !"@");
 	strcat(func_name, val_buffer);
+
+	TDW_g_sPlayerInDPage[playerid] = index;
 
 	if (funcidx(func_name) != -1)
 		if (CallLocalFunction(func_name, !"d", playerid) == 0)
@@ -136,8 +146,7 @@ stock DialogPage_Out(playerid)
 }
 
 // OnDialogResponse hook
-public
-	OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
 	if (dialogid == TDW_DIALOG_PAGE_ID) {
 		if (TDW_g_sPlayerInDPage[playerid] != TDW_INVALID_DIALOG_PAGE)
@@ -186,4 +195,23 @@ public
 #if defined TDWDHP@OnDialogResponse
 	forward TDWDHP@OnDialogResponse(playerid, dialogid, response, listitem,
 		inputtext[]);
+#endif
+
+
+#if !defined IsPackedString
+	#define IsPackedString%0(%1) ((%1){0} != 0)
+#endif
+
+#if !defined IsEmptyString
+	stock IsEmptyString(const string[])
+	{
+		return (IsPackedString(string) ? (string{0}) : (string[0])) == '\0';
+	}
+#endif
+#if !defined strcpy
+	stock strcpy(dest[], const string[], dest_size = sizeof dest)
+	{
+		return (IsPackedString(dest) ? (dest{0} = '\0') : (dest[0] = '\0')),
+			strcat(dest, string, dest_size);
+	}
 #endif
