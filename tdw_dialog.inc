@@ -85,7 +85,9 @@
 #define dialogfh@t(%2,%9)(%6) @CT:dialogf@cc(%2,T,%9)(%6)
 #define dialogfh@T(%2,%9)(%6) @Cf:dialogf@cc(%2,f,%9)(%6)
 #define dialogfh@f(%2,%9)(%6) @CF:dialogf@cc(%2,F,%9)(%6)
-#define dialogfh@F(%2,%9)(%6)
+#define dialogfh@F(%2,%9)(%6) __end:
+
+#define __end:%0|||%1(%2) u@$forward public __dialog__warning();public __dialog__warning()for(new __YOU_SHOULD_USE_ONLY_BOOLEAN__;;)
 
 #define dialog_@v2:%8$%1(%3) %8$ddialog_FLAG(%1);ddialog_PUBLIC(du_@%1(ddialog_DEFAULT_ARGS)){ \
 	ddialog_V2_CALL(%1,__default,%3)                                                           \
