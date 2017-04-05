@@ -52,6 +52,7 @@
 #define u@$ 0]);
 #define __:%0$ u@(u[_:%0 u@$
 
+// Utils macros
 #define ddialog_PUBLIC(%1) forward %1;public %1
 #define ddialog_FLAG(%1) public E_DIALOG_FLAG:df_@%1=E_DIALOG_FLAG:0
 #define ddialog_CALL_STATE(%1,%2) { state ds@st:%2;%1; }
@@ -62,13 +63,15 @@
 
 #define ddialog_DEFAULT_ARGS playerid,response,listitem,inputtext[]
 
+// Parse the pseudo-operator "dialog"
 #define dialog%1(%2) dialog_@r:%1(%2)
 #define dialog_@r: __:dialog_@v1:dialog_@v2:$
 
-#define dialog_sg:dialogf@%0(%2\32; dialog_sg:dialogf@%0(%2
-
+// First variant - with automatons
 #define dialog_@v1:dialog_@v2:%8$%1<%2>%0(%3) dialogf@c(%2)|||%1(%3)
 #define dialogf@c(%2) dialog_sg:dialogf@c_g(%2,0)(%2)
+
+#define dialog_sg:dialogf@%0(%2\32; dialog_sg:dialogf@%0(%2
 
 #define dialogf@c_g(%2,%9)(%6) @Ct:dialogf@cc(%2,t,%9)(%6)
 #define dialogf@cc(%2,%7,%9)(%6) dialogfh@%7(%2,%9)(%6)
@@ -77,11 +80,13 @@
 
 #define dialogg:%8$%0(%1)<ds@st:__%9\32; dialogg:%8$%0(%1)<ds@st:__%9
 
+// Find the char
 #define @Ct:dialogf@cc(t%2,%7,%9)(%6) dialogf@cl:T(%6)
 #define @CT:dialogf@cc(T%2,%7,%9)(%6) dialogf@cl:T(%6)
 #define @Cf:dialogf@cc(f%2,%7,%9)(%6) dialogf@cl:F(%6)
 #define @CF:dialogf@cc(F%2,%7,%9)(%6) dialogf@cl:F(%6)
 
+// Set next char
 #define dialogfh@t(%2,%9)(%6) @CT:dialogf@cc(%2,T,%9)(%6)
 #define dialogfh@T(%2,%9)(%6) @Cf:dialogf@cc(%2,f,%9)(%6)
 #define dialogfh@f(%2,%9)(%6) @CF:dialogf@cc(%2,F,%9)(%6)
@@ -89,6 +94,7 @@
 
 #define __end:%0|||%1(%2) u@$forward public __dialog__warning();public __dialog__warning()for(new __YOU_SHOULD_USE_ONLY_BOOLEAN__;;)
 
+// Second variant - switcher
 #define dialog_@v2:%8$%1(%3) %8$ddialog_FLAG(%1);ddialog_PUBLIC(du_@%1(ddialog_DEFAULT_ARGS)){ \
 	ddialog_V2_CALL(%1,__default,%3)                                                           \
 	if (ddialog_IS_FLAG(%1,SWITCH)) {                                                          \
@@ -99,6 +105,7 @@
 	}}                                                                                         \
 	forward public di@%1(%3);stock di@%1(%3)<>{_TDW_DIALOG_SHOULD_RETURN}stock di@%1(%3)<ds@st:__default>
 
+// Remove travalling whitespace
 #define di@%1\32; di@%1
 #define diT@%1\32; diT@%1
 #define diF@%1\32; diF@%1
