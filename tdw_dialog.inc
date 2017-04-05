@@ -186,7 +186,7 @@ static stock Dialog_Init()
 	#if defined TDW_DLG@OnFilterScriptInit
 		return TDW_DLG@OnFilterScriptInit();
 	#else
-			1;
+		return 1;
 	#endif
 	}
 
