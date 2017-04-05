@@ -1,215 +1,193 @@
 /** ======================================================================== **\
 	Dialog
 
-| Description:
-A library with the new syntax for working with dialogs outside of
-OnDialogResponse. Besides, the library have functions that can be help in
-a script.
-
-| Version:
-3.0.1
-
 | License:
-Copyright (c) 2016 Double V
+	Copyright (c) 2016 Double V
 
-This software is provided 'as-is', without any express or implied
-warranty. In no event will the authors be held liable for any damages
-arising from the use of this software.
+	This software is provided 'as-is', without any express or implied
+	warranty. In no event will the authors be held liable for any damages
+	arising from the use of this software.
 
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
+	Permission is granted to anyone to use this software for any purpose,
+	including commercial applications, and to alter it and redistribute it
+	freely, subject to the following restrictions:
 
-1.	The origin of this software must not be misrepresented; you must not
-	claim that you wrote the original software. If you use this software
-	in a product, an acknowledgement in the product documentation would be
-	appreciated but is not required.
-2.	Altered source versions must be plainly marked as such, and must not be
-	misrepresented as being the original software.
-3.	This notice may not be removed or altered from any source distribution.
+	1.	The origin of this software must not be misrepresented; you must not
+		claim that you wrote the original software. If you use this software
+		in a product, an acknowledgement in the product documentation would be
+		appreciated but is not required.
+	2.	Altered source versions must be plainly marked as such, and must not be
+		misrepresented as being the original software.
+	3.	This notice may not be removed or altered from any source distribution.
 \** ======================================================================== **/
-
 
 #if defined _inc_tdw_dialog
 	#undef _inc_tdw_dialog
 #endif
 
-#if defined _TDW_DLLIB__DIALOG
+#if defined _TDW_LIB_DIALOG
 	#endinput
 #endif
 
-#define _TDW_DLLIB__DIALOG
+#define _TDW_LIB_DIALOG
 
-forward OnDialogPerformed(playerid, const dialog_name[], response,
-	bool:success
-);
+#include "amx/amx_header"
+#include "amx/amx_memory"
+#include "amx/dynamic_call"
 
-// -----------------------------------------------------------------------------
-// Constant
-// -----------------------------------------------------------------------------
-
-#define TDW_MAX_FUNCTION_NAME (31)
-#define TDW_DIALOG_PLAYER_DIALOG_HIDER (0xffffffff)
-
-#if !defined TDW_DIALOG_ID
-	#define TDW_DIALOG_ID (32767)
+#if !defined _TDW_DIALOG_ID
+	#define _TDW_DIALOG_ID (32767)
 #else
 	#assert (0 <= TDW_DIALOG_ID <= 32767)
 #endif
 
-// -----------------------------------------------------------------------------
-// Template
-// -----------------------------------------------------------------------------
+#if !defined _TDW_DIALOG_SHOULD_RETURN
+	#define _TDW_DIALOG_SHOULD_RETURN
+#endif
+
+#define TDW_DIALOG_MAX_FUNC_NAME (32)
+#define TDW_DIALOG_PLAYER_USE_HIDER (-1)
+#define TDW_DIALOG_MAX_TAG_NAME (4)
 
 #define u@$ 0]);
 #define __:%0$ u@(u[_:%0 u@$
 
-#define dialog%1(%2) dlg@r(%1,%2)
+#define ddialog_PUBLIC(%1) forward %1;public %1
+#define ddialog_FLAG(%1) public E_DIALOG_FLAG:df_@%1=E_DIALOG_FLAG:0
+#define ddialog_CALL_STATE(%1,%2) { state ds@st:%2;%1; }
+#define ddialog_BRK:%3[%9]%0) _:ddialog_BRK:%3%0)
+#define ddialog_V2_CALL(%1,%2,%3) ddialog_CALL_STATE(di@%1(_:ddialog_BRK:%3),%2)
+#define ddialog_IS_FLAG(%1,%2) ((df_@%1) & (EI_DIALOG_%2))
+#define ddialog_DECLARE_STATE(%1) _dialog_dummy()<%1>
 
-#define dlg@r(%1,%2) dlg@s:%1(%2)
-#define dlg@s: __:dlg@s1:dlg@s2:$
-// with automatons
-#define dlg@s1:dlg@s2:%8$%1[%3]%0(%2) %8$public dR@%1(playerid,response,listitem,inputtext[])<dialogState:%3>{return dC@%1_%3(dlg@tN:%2[]$);}stock dC@%1_%3(%2)
-// without automatons
-#define dlg@s2:%8$%1(%2) %8$forward dR@%1(playerid,response,listitem,inputtext[]);public dR@%1(playerid,response,listitem,inputtext[])<>return 0;public dR@%1(playerid,response,listitem,inputtext[])<dialogState:default_state>{return dC@%1(dlg@tN:%2[]$);}stock dC@%1(%2)
-// delete spaces.
-#define dR@%8\32%1(%2) dR@%8%1(%2)
-#define dC@%8\32%1(%2) dC@%8%1(%2)
-// delete [] from arguments.
-#define dlg@tN:%2[%3]%0$) %2)
+#define ddialog_DEFAULT_ARGS playerid,response,listitem,inputtext[]
 
-#define dtempl%1(%2) forward dT@%1(%2);public dT@%1(%2)
-#define dT@%0\32;%1(%2) dT@%0%1(%2)
+#define dialog%1(%2) dialog_@r:%1(%2)
+#define dialog_@r: __:dialog_@v1:dialog_@v2:$
 
-#define dfunc: #
+#define dialog_@v1:dialog_@v2:%8$%1<%2>%0(%3) dialogf@c(%2)|||%1(%3)
+#define dialogf@c(%2) dialogf@c_g(%2,0)(%2)
 
-// -----------------------------------------------------------------------------
-// Vars
-// -----------------------------------------------------------------------------
+#define dialogf@c_g(%2,%9)(%6) @Ct:dialogf@cc(%2,t,%9)(%6)
+#define dialogf@cc(%2,%7,%9)(%6) dialogfh@%7(%2,%9)(%6)
+
+#define dialogf@cl:%0(%2)|||%1(%3) u@$ddialog_PUBLIC(di%0@%1(%3)){}stock di@%1(%3)<ds@st:__%2>
+
+#define @Ct:dialogf@cc(t%2,%7,%9)(%6) dialogf@cl:T(%6)
+#define @CT:dialogf@cc(T%2,%7,%9)(%6) dialogf@cl:T(%6)
+#define @Cf:dialogf@cc(f%2,%7,%9)(%6) dialogf@cl:F(%6)
+#define @CF:dialogf@cc(F%2,%7,%9)(%6) dialogf@cl:F(%6)
+
+#define dialogfh@t(%2,%9)(%6) @CT:dialogf@cc(%2,T,%9)(%6)
+#define dialogfh@T(%2,%9)(%6) @Cf:dialogf@cc(%2,f,%9)(%6)
+#define dialogfh@f(%2,%9)(%6) @CF:dialogf@cc(%2,F,%9)(%6)
+#define dialogfh@F(%2,%9)(%6) // charecter is not found
+
+#define dialog_@v2:%8$%1(%3) %8$ddialog_FLAG(%1);ddialog_PUBLIC(du_@%1(ddialog_DEFAULT_ARGS)){ \
+	ddialog_V2_CALL(%1,__default,%3)                                                           \
+	if (ddialog_IS_FLAG(%1,SWITCH)) {                                                          \
+		if (response == 0 && ddialog_IS_FLAG(%1,FALSE_IMPL))                                   \
+			ddialog_V2_CALL(%1,__false,%3)                                                     \
+		else if (ddialog_IS_FLAG(%1,TRUE_IMPL))                                                \
+			ddialog_V2_CALL(%1,__true,%3)                                                      \
+	}}                                                                                         \
+	forward public di@%1(%3);stock di@%1(%3)<>{_TDW_DIALOG_SHOULD_RETURN}stock di@%1(%3)<ds@st:__default>
+
+#define di@%1\32; di@%1
+#define diT@%1\32; diT@%1
+#define diF@%1\32; diF@%1
+#define df_@%1\32; df_@%1
+#define du_@%1\32; du_@%1
+
+#define d%0<%1> #%1
+
+enum E_DIALOG_FLAG (<<= 1)
+{
+	EI_DIALOG_SWITCH,     // if the dialog function has case-functions:
+	EI_DIALOG_TRUE_IMPL,  // - true-case
+	EI_DIALOG_FALSE_IMPL  // - false-case
+};
+
+enum E_DIALOG_CALLBACKS (<<= 1)
+{
+	EI_DIALOG_CB_OnDialogPerformed = 1
+};
+
+forward OnDialogPerformed(playerid, const dialog_name[], response, bool:success);
+
+forward public _dialog_dummy();
+
+ddialog_DECLARE_STATE(             ){}
+ddialog_DECLARE_STATE(ds@st:__true ){}
+ddialog_DECLARE_STATE(ds@st:__false){}
 
 static stock
-	TDW_g_sDialog@CallbackName[MAX_PLAYERS][TDW_MAX_FUNCTION_NAME char],
-	bool:TDW_g_sDialog@IsAlreadyOpen[MAX_PLAYERS char],
+	TDW_g_sAmxHdr[AMX_HDR],
+	bool:TDW_g_sDialogOpened[MAX_PLAYERS char],
+	TDW_g_sDialogName[MAX_PLAYERS][TDW_DIALOG_MAX_FUNC_NAME char],
+	E_DIALOG_CALLBACKS:TDW_g_sCallbacks,
+	TDW_g_sSpace[] = " ";
+
+static stock const
 	TDW_g_sSpecifier@ddds[] = !"ddds",
-	TDW_g_sSpecifier@isii[] = !"isii",
-	TDW_g_sCallbacks,
-	TDW_g_sOnDialogPerformed[] = "OnDialogPerformed",
-	TDW_g_sSpace[] = !" ",
-	TDW_g_sPrefix@dR@[] = !"dR@";
+	TDW_g_sOnDialogPerformed[] = !"OnDialogPerformed",
+	TDW_g_sSwitcherTag[] = !"du_@";
 
-// -----------------------------------------------------------------------------
-// Hooks
-// -----------------------------------------------------------------------------
-
-// OnDialogResponse hook
-public
-	OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+static stock Dialog_Init()
 {
-	static
-		callback_name[TDW_MAX_FUNCTION_NAME],
-		ret;
-	if (dialogid == TDW_DIALOG_ID) {
-		if (TDW_g_sDialog@IsAlreadyOpen{playerid}) {
-			TDW_g_sDialog@IsAlreadyOpen{playerid} = false;
-			if (inputtext[0] == '\0') {
-				// Call the function without inputtext.
-				ret = CallLocalFunction(TDW_g_sDialog@CallbackName[playerid],
-					TDW_g_sSpecifier@ddds, playerid, response, listitem, !"\1"
-				);
-			} else {
-				#if defined TDW_DIALOG_PROTECT_INPUT
-					new inputtext_len = strlen(inputtext);
-					do {
-						if (inputtext[inputtext_len] == '%')
-							inputtext[inputtext_len] = '#';
-					} while (--inputtext_len != 0);
-				#endif
-				// Call the function with inputtext.
-				ret = CallLocalFunction(TDW_g_sDialog@CallbackName[playerid],
-					TDW_g_sSpecifier@ddds, playerid, response, listitem,
-					inputtext
-				);
+	GetAmxHeader(TDW_g_sAmxHdr);
+
+	new
+		num_publics = GetNumPublics(TDW_g_sAmxHdr),
+		name[TDW_DIALOG_MAX_FUNC_NAME],
+		flag_addr,
+		E_DIALOG_FLAG:flag_value;
+
+	for (new i = 0; i < num_publics; ++i)
+	{
+		if (GetPublicNameFromIndex(i, name) && strcmp(name, TDW_g_sSwitcherTag, _, TDW_DIALOG_MAX_TAG_NAME) == 0)
+		{
+			// Get the flag address
+			name[1] = 'f';
+			flag_addr = GetPubVarAddressFromName(name);
+			if (flag_addr == -1)
+				continue;
+
+			flag_value = E_DIALOG_FLAG:ReadAmxMemory(flag_addr);
+
+			name[1] = 'i';
+
+			name[2] = 'T';  // true
+			if (GetPublicIndexFromName(name) != -1)
+			{
+				flag_value |= EI_DIALOG_TRUE_IMPL | EI_DIALOG_SWITCH;
 			}
-			if (TDW_g_sCallbacks & 1) {
-				strunpack(callback_name, TDW_g_sDialog@CallbackName[playerid]);
-				CallLocalFunction(TDW_g_sOnDialogPerformed,
-					TDW_g_sSpecifier@isii, playerid, callback_name, response,
-					ret
-				);
+
+			name[2] = 'F';  // false
+			if (GetPublicIndexFromName(name) != -1)
+			{
+				flag_value |= EI_DIALOG_TRUE_IMPL | EI_DIALOG_SWITCH;
 			}
-		} else {
-			if (TDW_g_sCallbacks & 1) {
-				strunpack(callback_name, TDW_g_sDialog@CallbackName[playerid]);
-				CallLocalFunction(TDW_g_sOnDialogPerformed,
-					TDW_g_sSpecifier@isii, playerid, callback_name, response,
-					TDW_DIALOG_PLAYER_DIALOG_HIDER
-				);
-			}
+
+			WriteAmxMemory(flag_addr, _:flag_value);
 		}
 	}
-	return
-	#if defined TDWDH@OnDialogResponse
-		TDWDH@OnDialogResponse(playerid, dialogid, response, listitem,
-			inputtext
-		);
-	#else
-		1;
-	#endif
 }
-
-#if defined _ALS_OnDialogResponse
-	#undef OnDialogResponse
-#else
-	#define _ALS_OnDialogResponse
-#endif
-
-#define OnDialogResponse TDWDH@OnDialogResponse
-
-#if defined TDWDH@OnDialogResponse
-	forward TDWDH@OnDialogResponse(playerid, dialogid, response, listitem,
-		inputtext[]);
-#endif
-
-// OnPlayerDisconnect hook
-public
-	OnPlayerDisconnect(playerid, reason)
-{
-	#pragma unused reason
-	Dialog_Close(playerid);
-	return
-	#if defined TDWDH@OnPlayerDisconnect
-		TDWDH@OnPlayerDisconnect(playerid, reason);
-	#else
-		1;
-	#endif
-}
-
-#if defined _ALS_OnPlayerDisconnect
-	#undef OnPlayerDisconnect
-#else
-	#define _ALS_OnPlayerDisconnect
-#endif
-
-#define OnPlayerDisconnect TDWDH@OnPlayerDisconnect
-
-#if defined TDWDH@OnPlayerDisconnect
-	forward TDWDH@OnPlayerDisconnect(playerid, reason);
-#endif
 
 // OnFilterScriptInit/OnGameModeInit hook
 #if defined FILTERSCRIPT
-	public
-		OnFilterScriptInit()
+	public OnFilterScriptInit()
 	{
-		state dialogState:default_state;
 		if (funcidx(TDW_g_sOnDialogPerformed) != -1)
-			TDW_g_sCallbacks |= 1;
-		return
-		#if defined TDWDH@OnFilterScriptInit
-			TDWDH@OnFilterScriptInit();
-		#else
+			TDW_g_sCallbacks |= EI_DIALOG_CB_OnDialogPerformed;
+
+		Dialog_Init();
+
+	#if defined TDW_DLG@OnFilterScriptInit
+		return TDW_DLG@OnFilterScriptInit();
+	#else
 			1;
-		#endif
+	#endif
 	}
 
 	#if defined _ALS_OnFilterScriptInit
@@ -218,24 +196,24 @@ public
 		#define _ALS_OnFilterScriptInit
 	#endif
 
-	#define OnFilterScriptInit TDWDH@OnFilterScriptInit
+	#define OnFilterScriptInit TDW_DLG@OnFilterScriptInit
 
-	#if defined TDWDH@OnFilterScriptInit
-		forward TDWDH@OnFilterScriptInit();
+	#if defined TDW_DLG@OnFilterScriptInit
+		forward TDW_DLG@OnFilterScriptInit();
 	#endif
 #else
-	public
-		OnGameModeInit()
+	public OnGameModeInit()
 	{
-		state dialogState:default_state;
 		if (funcidx(TDW_g_sOnDialogPerformed) != -1)
-			TDW_g_sCallbacks |= 1;
-		return
-		#if defined TDWDH@OnGameModeInit
-			TDWDH@OnGameModeInit();
-		#else
-			1;
-		#endif
+			TDW_g_sCallbacks |= EI_DIALOG_CB_OnDialogPerformed;
+
+		Dialog_Init();
+
+	#if defined TDW_DLG@OnGameModeInit
+		return TDW_DLG@OnGameModeInit();
+	#else
+		return 1;
+	#endif
 	}
 
 	#if defined _ALS_OnGameModeInit
@@ -244,88 +222,130 @@ public
 		#define _ALS_OnGameModeInit
 	#endif
 
-	#define OnGameModeInit TDWDH@OnGameModeInit
+	#define OnGameModeInit TDW_DLG@OnGameModeInit
 
-	#if defined TDWDH@OnGameModeInit
-		forward TDWDH@OnGameModeInit();
+	#if defined TDW_DLG@OnGameModeInit
+		forward TDW_DLG@OnGameModeInit();
 	#endif
 #endif
 
-// -----------------------------------------------------------------------------
-// Workaround
-// -----------------------------------------------------------------------------
-
-@_TDW_DLLIB__DIALOG_@();
-@_TDW_DLLIB__DIALOG_@()
+// OnDialogResponse hook
+public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
-	#emit retn
-	ShowPlayerDialog(0, 0, 0, TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace,
-		TDW_g_sSpace
-	);
+	if (dialogid == _TDW_DIALOG_ID)
+	{
+		new retval;
+
+		if (_:TDW_g_sDialogOpened{playerid} == 0)
+		{
+			retval = TDW_DIALOG_PLAYER_USE_HIDER;
+		}
+		else
+		{
+			TDW_g_sDialogOpened{playerid} = false;
+
+			if (inputtext[0] == '\0')
+			{
+				retval = CallLocalFunction(TDW_g_sDialogName[playerid],
+					TDW_g_sSpecifier@ddds, playerid, response, listitem, !"\1");
+			}
+			else
+			{
+				new len = strlen(inputtext);
+
+				do
+				{
+					if (inputtext[len] == '#')
+						inputtext[len] = '%';
+				}
+				while (--len != 0);
+
+				retval = CallLocalFunction(TDW_g_sDialogName[playerid],
+					TDW_g_sSpecifier@ddds, playerid, response, listitem, inputtext);
+			}
+		}
+
+		if (TDW_g_sCallbacks & EI_DIALOG_CB_OnDialogPerformed)
+		{
+			static name[TDW_DIALOG_MAX_FUNC_NAME];
+
+			strunpack(name, TDW_g_sDialogName[playerid]);
+			CallLocalFunction(TDW_g_sOnDialogPerformed, !"isii", playerid, name, response, retval);
+		}
+	}
+
+#if defined TDW_DLG@OnDialogResponse
+	return TDW_DLG@OnDialogResponse(playerid, dialogid, response, listitem,
+		inputtext);
+#else
+	return 1;
+#endif
 }
 
-static stock TDW_DLLIB__AUTOMANTON()<>{return 0;}
-static stock TDW_DLLIB__AUTOMANTON()<dialogState:default_state>{return 0;}
+#if defined _ALS_OnDialogResponse
+	#undef OnDialogResponse
+#else
+	#define _ALS_OnDialogResponse
+#endif
 
-// -----------------------------------------------------------------------------
-// Functions
-// -----------------------------------------------------------------------------
+#define OnDialogResponse TDW_DLG@OnDialogResponse
 
-stock
-	Dialog_Open(playerid, const function_response[], style, const caption[],
-		const info[], const button1[], const button2[] = !"\0")
+#if defined TDW_DLG@OnDialogResponse
+	forward TDW_DLG@OnDialogResponse(playerid, dialogid, response, listitem,
+		inputtext[]);
+#endif
+
+@__TDW_DIALOG_FIX_@();
+@__TDW_DIALOG_FIX_@()
 {
-	TDW_g_sDialog@CallbackName[playerid] = TDW_g_sPrefix@dR@;
-	strcat(TDW_g_sDialog@CallbackName[playerid], function_response);
-	TDW_g_sDialog@IsAlreadyOpen{playerid} = true;
-	// All of string arguments in ShowPlayerDialog should be defined with
-	// a 'const' qualifier.
-	const TDW_DIALOG_ID_ND = TDW_DIALOG_ID;
+	#emit retn
+	ShowPlayerDialog(0, 0, 0, TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace);
+}
+
+stock Dialog_Open(playerid, const func[], style, const caption[], const info[],
+	const button1[], const button2[] = !"\0")
+{
+	TDW_g_sDialogName[playerid] = TDW_g_sSwitcherTag;
+	strcat(TDW_g_sDialogName[playerid], func);
+	TDW_g_sDialogOpened{playerid} = true;
+
+	const TDW_DIALOG_ID_CONST = _TDW_DIALOG_ID;
+	const PUSH_ARG_BYTES = 28;
+	const POP_ARG_BYTES = PUSH_ARG_BYTES + 4;
+
 	#emit push.s button2
 	#emit push.s button1
 	#emit push.s info
 	#emit push.s caption
 	#emit push.s style
-	#emit push.c TDW_DIALOG_ID_ND
+	#emit push.c TDW_DIALOG_ID_CONST
 	#emit push.s playerid
-	#emit push.c 28
+	#emit push.c PUSH_ARG_BYTES
 	#emit sysreq.c ShowPlayerDialog
-	#emit stack 32
+	#emit stack POP_ARG_BYTES
 	#emit retn
-	return 0; // Make compile happy!
+
+	return 0;
 }
 
-stock
-	Dialog_Close(playerid)
+stock Dialog_Close(playerid)
 {
-	TDW_g_sDialog@CallbackName[playerid]{0} = '\0';
-	TDW_g_sDialog@IsAlreadyOpen{playerid} = false;
+
+	TDW_g_sDialogName[playerid]{0} = '\0';
+	TDW_g_sDialogOpened{playerid} = false;
+
 	return ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, TDW_g_sSpace,
-		TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace
-	);
+		TDW_g_sSpace, TDW_g_sSpace, TDW_g_sSpace);
 }
 
-stock
-	Dialog_Show(playerid, const template_name[])
+stock IsPlayerInDialog(playerid)
 {
-	static function_name[TDW_MAX_FUNCTION_NAME char];
-	function_name = !"dT@";
-	strcat(function_name, template_name);
-	return CallLocalFunction(function_name, !"d", playerid);
+	return TDW_g_sDialogOpened{playerid};
 }
 
-stock
-	IsPlayerInDialog(playerid)
+stock Dialog_MessageBox(playerid, const caption[], const info[], const button1[], const button2[] = !"\0")
 {
-	return TDW_g_sDialog@IsAlreadyOpen{playerid};
-}
+	static const message_box_name[] = !"MessageBox";
 
-stock
-	Dialog_MessageBox(playerid, const caption[], const info[], const button1[],
-		const button2[] = !"\0")
-{
-	static const __message_box_name[] = !"Message";
-	return Dialog_Open(playerid, __message_box_name, DIALOG_STYLE_MSGBOX,
-		caption, info, button1, button2
-	);
+	return Dialog_Open(playerid, message_box_name, DIALOG_STYLE_MSGBOX, caption, info, button1, button2);
 }
