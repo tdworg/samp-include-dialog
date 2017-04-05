@@ -65,13 +65,17 @@
 #define dialog%1(%2) dialog_@r:%1(%2)
 #define dialog_@r: __:dialog_@v1:dialog_@v2:$
 
+#define dialog_sg:dialogf@%0(%2\32; dialog_sg:dialogf@%0(%2
+
 #define dialog_@v1:dialog_@v2:%8$%1<%2>%0(%3) dialogf@c(%2)|||%1(%3)
-#define dialogf@c(%2) dialogf@c_g(%2,0)(%2)
+#define dialogf@c(%2) dialog_sg:dialogf@c_g(%2,0)(%2)
 
 #define dialogf@c_g(%2,%9)(%6) @Ct:dialogf@cc(%2,t,%9)(%6)
 #define dialogf@cc(%2,%7,%9)(%6) dialogfh@%7(%2,%9)(%6)
 
-#define dialogf@cl:%0(%2)|||%1(%3) u@$ddialog_PUBLIC(di%0@%1(%3)){}stock di@%1(%3)<ds@st:__%2>
+#define dialogf@cl:%0(%2)|||%1(%3) u@$ddialog_PUBLIC(di%0@%1(%3)){}__:dialogg:$stock di@%1(%3)<ds@st:__%2>
+
+#define dialogg:%8$%0(%1)<ds@st:__%9\32; dialogg:%8$%0(%1)<ds@st:__%9
 
 #define @Ct:dialogf@cc(t%2,%7,%9)(%6) dialogf@cl:T(%6)
 #define @CT:dialogf@cc(T%2,%7,%9)(%6) dialogf@cl:T(%6)
@@ -81,7 +85,7 @@
 #define dialogfh@t(%2,%9)(%6) @CT:dialogf@cc(%2,T,%9)(%6)
 #define dialogfh@T(%2,%9)(%6) @Cf:dialogf@cc(%2,f,%9)(%6)
 #define dialogfh@f(%2,%9)(%6) @CF:dialogf@cc(%2,F,%9)(%6)
-#define dialogfh@F(%2,%9)(%6) // charecter is not found
+#define dialogfh@F(%2,%9)(%6)
 
 #define dialog_@v2:%8$%1(%3) %8$ddialog_FLAG(%1);ddialog_PUBLIC(du_@%1(ddialog_DEFAULT_ARGS)){ \
 	ddialog_V2_CALL(%1,__default,%3)                                                           \
@@ -330,7 +334,6 @@ stock Dialog_Open(playerid, const func[], style, const caption[], const info[],
 
 stock Dialog_Close(playerid)
 {
-
 	TDW_g_sDialogName[playerid]{0} = '\0';
 	TDW_g_sDialogOpened{playerid} = false;
 
