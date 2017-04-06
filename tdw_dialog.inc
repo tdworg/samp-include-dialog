@@ -60,6 +60,7 @@
 #define ddialog_V2_CALL(%1,%2,%3) ddialog_CALL_STATE(di@%1(_:ddialog_BRK:%3),%2)
 #define ddialog_IS_FLAG(%1,%2) ((df_@%1) & (EI_DIALOG_%2))
 #define ddialog_DECLARE_STATE(%1) _dialog_dummy()<%1>
+#define ddialog_WARNING_BOOLEAN forward public __dialog__warning();public __dialog__warning()for(new __YOU_SHOULD_USE_ONLY_BOOLEAN__;;)
 
 #define ddialog_DEFAULT_ARGS playerid,response,listitem,inputtext[]
 
@@ -76,7 +77,12 @@
 #define dialogf@c_g(%2,%9)(%6) @Ct:dialogf@cc(%2,t,%9)(%6)
 #define dialogf@cc(%2,%7,%9)(%6) dialogfh@%7(%2,%9)(%6)
 
-#define dialogf@cl:%0(%2)|||%1(%3) u@$ddialog_PUBLIC(di%0@%1(%3)){}__:dialogg:$stock di@%1(%3)<ds@st:__%2>
+#define dialogf@cl:%0(%2)|||%1(%3) dialogf@tst:u@$ddialog_PUBLIC(di%0@%1(%3)){}__:dialogg:$stock di@%1(%3)<ds@st:__%2>
+
+#define dialogf@tst: dialogf@tst_true:dialogf@tst_false:dialogf@tst_ops:
+#define dialogf@tst_true:dialogf@tst_false:dialogf@tst_ops:%8$%9<ds@st:__true> %8$%9<ds@st:__true>
+#define dialogf@tst_false:dialogf@tst_ops:%8$%9<ds@st:__false> %8$%9<ds@st:__false>
+#define dialogf@tst_ops:%8$%9<ds@st:__%1> %8$ddialog_WARNING_BOOLEAN
 
 #define dialogg:%8$%0(%1)<ds@st:__%9\32; dialogg:%8$%0(%1)<ds@st:__%9
 
@@ -92,7 +98,7 @@
 #define dialogfh@f(%2,%9)(%6) @CF:dialogf@cc(%2,F,%9)(%6)
 #define dialogfh@F(%2,%9)(%6) __end:
 
-#define __end:%0|||%1(%2) u@$forward public __dialog__warning();public __dialog__warning()for(new __YOU_SHOULD_USE_ONLY_BOOLEAN__;;)
+#define __end:%0|||%1(%2) u@$ddialog_WARNING_BOOLEAN
 
 // Second variant - switcher
 #define dialog_@v2:%8$%1(%3) %8$ddialog_FLAG(%1);ddialog_PUBLIC(du_@%1(ddialog_DEFAULT_ARGS)){ \
