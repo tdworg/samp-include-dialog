@@ -56,14 +56,14 @@
 	#define g@g g@n
 #endif
 // #define g@v:%8$%1(%2)(%3) %8$public const d@%1=(%3);forward %1(%2);public %1(%2)
-#define g@n:%8$%1(%2)(%3) %8$forward tdd_%1(%2);public tdd_%1(%2)
-#define g@h:%8$%1(%2)(%3) %8$hook tdd_%1(%2)
-#define g@t:%8$%1(%2)(%3) %8$forward tdt_%1(%2);public tdt_%1(%2)
+#define g@n:%8$%1(%2)(%3) %8$forward D_%1(%2);public D_%1(%2)
+#define g@h:%8$%1(%2)(%3) %8$hook D_%1(%2)
+#define g@t:%8$%1(%2)(%3) %8$forward T_%1(%2);public T_%1(%2)
 
 #define d@%1\32; d@%1
-#define tdd_%1\32; tdd_%1
-#define tdt_%1\32; tdt_%1
-#define @yH_tdd_%1\32; @yH_tdd_%1
+#define D_%1\32; D_%1
+#define T_%1\32; T_%1
+#define @yH_D_%1\32; @yH_D_%1
 
 // alternative syntax
 #define Dialog:%1(%2) dialog %1(%2)
@@ -73,6 +73,7 @@
 #define Dialog_Open OpenDialog
 #define Dialog_Close CloseDialog
 #define Dialog_Show ShowDialog
+#define dfunc: #
 
 #if !defined _INC_SAMP_Community_fixes && !defined FIX_const
 	native TDW_DIALOG_ShowPlayerDialog(playerid, dialogid, style,
@@ -102,7 +103,7 @@ static stock
 stock OpenDialog(playerid, const func[], style,	const caption[], const info[],
 	const button1[], const button2[])
 {
-	TDW_gsDialogName[playerid] = !"tdd_";
+	TDW_gsDialogName[playerid] = !"D_";
 	strcat(TDW_gsDialogName[playerid], func);
 
 	TDW_gsDialogOpened{playerid} = true;
@@ -130,7 +131,7 @@ stock IsPlayerInDialog(playerid)
 
 stock ShowDialog(playerid, const func[])
 {
-	new buffer[TDW_DIALOG_MAX_FUNC_NAME char] = !"tdt_";
+	new buffer[TDW_DIALOG_MAX_FUNC_NAME char] = !"T_";
 	strcat(buffer, func);
 
 	return CallLocalFunction(buffer, !"d", playerid);
