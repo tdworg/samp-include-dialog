@@ -50,10 +50,12 @@
 // #define f@g:%8$%0<%3>%1(%2)() g@v:%8$%0%1(%2)(%3)
 
 // #define g@v:%8$%1(%2)(%3) %8$public const d@%1=(%3);forward %1(%2);public %1(%2)
-#define g@n:%8$%1(%2)(%3) %8$forward %1(%2);public %1(%2)
-#define g@h:%8$%1(%2)(%3) %8$hook %1(%2)
+#define g@n:%8$%1(%2)(%3) %8$forward tdd_%1(%2);public tdd_%1(%2)
+#define g@h:%8$%1(%2)(%3) %8$hook tdd_%1(%2)
 
 #define d@%1\32; d@%1
+#define tdd_%1\32; tdd_%1
+#define @yH_tdd_%1\32; @yH_tdd_%1
 
 // alternative syntax
 #define Dialog:%1(%2) dialog %1(%2)
@@ -87,7 +89,7 @@ static stock
 stock OpenDialog(playerid, const func[], style,	const caption[], const info[],
 	const button1[], const button2[])
 {
-	TDW_gsDialogName[playerid]{0} = '\0';
+	TDW_gsDialogName[playerid] = !"tdd_";
 	strcat(TDW_gsDialogName[playerid], func);
 
 	return ShowPlayerDialog(playerid, TDW_DIALOG_ID, style, caption, info,

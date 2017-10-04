@@ -1,10 +1,9 @@
 #include <a_samp>
 
-// #include <ysi\y_hooks>
+#include <ysi\y_hooks>
 #include <dialog/tdw_dialog>
 
 dialog [hook] abc(playerid, response, listitem, inputtext[])
-
 {
 	printf("Called");
 }
