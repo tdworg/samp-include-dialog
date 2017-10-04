@@ -169,6 +169,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 
 #if !defined TDW_DIALOG_SUPPORT_Y_HOOKS && defined TDW_DLG@OnDialogResponse
 	TDW_DLG@OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
+	// this workaround is used to get the return value of TDW_DLG@OnDialogResponse.
 	#emit stor.pri ret
 	return ret;
 #else
