@@ -64,7 +64,7 @@
 
 // alternative syntax
 #define Dialog:%1(%2) dialog %1(%2)
-#define DialogResponse: Dialog:
+#define DialogResponse Dialog
 
 
 #if !defined _INC_SAMP_Community_fixes && !defined FIX_const
@@ -89,13 +89,16 @@ const
 	TDW_DIALOG_MAX_FUNC_NAME = 32;
 
 static stock
-	TDW_gsDialogName[MAX_PLAYERS][TDW_DIALOG_MAX_FUNC_NAME char];
+	TDW_gsDialogName[MAX_PLAYERS][TDW_DIALOG_MAX_FUNC_NAME char],
+	bool:TDW_gsDialogOpened[MAX_PLAYERS char];
 
 stock OpenDialog(playerid, const func[], style,	const caption[], const info[],
 	const button1[], const button2[])
 {
 	TDW_gsDialogName[playerid] = !"tdd_";
 	strcat(TDW_gsDialogName[playerid], func);
+
+	TDW_gsDialogOpened{playerid} = true;
 
 	return ShowPlayerDialog(playerid, TDW_DIALOG_ID, style, caption, info,
 		button1, button2);
@@ -107,9 +110,15 @@ stock CloseDialog(playerid)
 		space[] = !" ";
 
 	TDW_gsDialogName[playerid]{0} = '\0';
+	TDW_gsDialogOpened{playerid} = false;
 
 	return ShowPlayerDialog(playerid, -1, DIALOG_STYLE_MSGBOX, space, space,
 		space, space);
+}
+
+stock IsDialogOpen(playerid)
+{
+	return TDW_gsDialogOpened{playerid};
 }
 
 
@@ -121,21 +130,33 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
 	static ret;
 	#pragma unused ret
+
 	if (dialogid == TDW_DIALOG_ID) {
+		if (_:TDW_gsDialogOpened{playerid} == 0)
+			return 0;
+		TDW_gsDialogOpened{playerid} = false;
+
 		if (inputtext[0] == '\0') {
-			CallLocalFunction(TDW_gsDialogName[playerid], !"ddds", playerid,
-				response, listitem, !"\1");
+			return CallLocalFunction(TDW_gsDialogName[playerid], !"ddds",
+				playerid, response, listitem, !"\1");
 		} else {
-			CallLocalFunction(TDW_gsDialogName[playerid], !"ddds", playerid,
-				response, listitem, inputtext);
+			new len = strlen(inputtext);
+			do {
+				if (inputtext[len] == '%')
+					inputtext[len] = '#';
+			} while (--len != 0);
+
+			return CallLocalFunction(TDW_gsDialogName[playerid], !"ddds",
+				playerid, response, listitem, inputtext);
 		}
 	}
+
 #if !defined TDW_DIALOG_SUPPORT_Y_HOOKS && defined TDW_DLG@OnDialogResponse
 	TDW_DLG@OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
 	#emit stor.pri ret
 	return ret;
 #else
-	return 1;
+	return 0;
 #endif
 }
 #if !defined TDW_DIALOG_SUPPORT_Y_HOOKS
