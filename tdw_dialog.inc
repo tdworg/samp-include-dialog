@@ -25,6 +25,10 @@
 #endif
 #define _TDW_DIALOG_INC_
 
+#if defined _INC_y_hooks
+	#define TDW_DIALOG_SUPPORT_Y_HOOKS
+#endif
+
 
 #define u@$ 0]);
 #define __:%0$ u@(u[_:%0 u@$
@@ -37,7 +41,11 @@
 #define a@n:%8$%0[]%1(%2)               %8$%0%1(%2)
 
 #define r@%1\32; r@%1
-#define r@hook g@h  // support y_hooks
+#if defined TDW_DIALOG_SUPPORT_Y_HOOKS
+	#define r@hook g@h  // support y_hooks
+#else
+	#define r@hook g@n
+#endif
 
 // #define f@g:%8$%0<%3>%1(%2)() g@v:%8$%0%1(%2)(%3)
 
@@ -95,48 +103,39 @@ stock CloseDialog(playerid)
 }
 
 
-// OnDialogResponse hook
+#if defined TDW_DIALOG_SUPPORT_Y_HOOKS
+hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+#else
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+#endif
 {
-	if (dialogid == TDW_DIALOG_ID)
-	{
-		if (inputtext[0] == '\0')
-		{
-			CallLocalFunction(TDW_gsDialogName[playerid],
-				"ddds", playerid, response, listitem, !"\1");
-		}
-		else
-		{
-			new len = strlen(inputtext);
-
-			do
-			{
-				if (inputtext[len] == '#')
-					inputtext[len] = '%';
-			}
-			while (--len != 0);
-
-			CallLocalFunction(TDW_gsDialogName[playerid],
-				"ddds", playerid, response, listitem, inputtext);
+	static ret;
+	if (dialogid == TDW_DIALOG_ID) {
+		if (inputtext[0] == '\0') {
+			CallLocalFunction(TDW_gsDialogName[playerid], !"ddds", playerid,
+				response, listitem, !"\1");
+		} else {
+			CallLocalFunction(TDW_gsDialogName[playerid], !"ddds", playerid,
+				response, listitem, inputtext);
 		}
 	}
-
-#if defined TDW_DLG@OnDialogResponse
-	TDW_DLG@OnDialogResponse(playerid, dialogid, response, listitem,
-		inputtext);
-#endif
-	return 1;
-}
-
-#if defined _ALS_OnDialogResponse
-	#undef OnDialogResponse
+#if !defined TDW_DIALOG_SUPPORT_Y_HOOKS && defined TDW_DLG@OnDialogResponse
+	TDW_DLG@OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
+	#emit stor.pri ret
+	return ret;
 #else
-	#define _ALS_OnDialogResponse
+	return 1;
 #endif
-
-#define OnDialogResponse TDW_DLG@OnDialogResponse
-
-#if defined TDW_DLG@OnDialogResponse
+}
+#if !defined TDW_DIALOG_SUPPORT_Y_HOOKS
+	#if defined _ALS_OnDialogResponse
+		#undef OnDialogResponse
+	#else
+		#define _ALS_OnDialogResponse
+	#endif
+	#define OnDialogResponse TDW_DLG@OnDialogResponse
+	#if defined TDW_DLG@OnDialogResponse
 	forward TDW_DLG@OnDialogResponse(playerid, dialogid, response, listitem,
 		inputtext[]);
+	#endif
 #endif

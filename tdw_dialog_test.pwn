@@ -1,13 +1,15 @@
 #include <a_samp>
 
+// #include <ysi\y_hooks>
 #include <dialog/tdw_dialog>
 
-dialog [] abc(playerid)
+dialog [hook] abc(playerid, response, listitem, inputtext[])
+
 {
 	printf("Called");
 }
 
-DialogResponse: []name(playerid)
+DialogResponse: [] name(playerid, response, listitem, inputtext[])
 {}
 
 public OnFilterScriptInit()
@@ -25,3 +27,9 @@ public OnPlayerCommandText(playerid, cmdtext[])
 	}
 	return 0;
 }
+
+
+// public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+// {
+
+// }
