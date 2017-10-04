@@ -8,6 +8,11 @@ dialog register(playerid, response, listitem, inputtext[])
 	SendClientMessage(playerid, -1, "Registered");
 }
 
+dtempl register(playerid)
+{
+
+}
+
 public OnPlayerConnect(playerid)
 {
 	OpenDialog(playerid, "register", DIALOG_STYLE_MSGBOX,

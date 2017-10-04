@@ -46,6 +46,7 @@
 	#define r@hook g@n
 #endif
 #define r@nohook g@n
+#define r@template g@t
 
 // #define f@g:%8$%0<%3>%1(%2)() g@v:%8$%0%1(%2)(%3)
 
@@ -57,15 +58,21 @@
 // #define g@v:%8$%1(%2)(%3) %8$public const d@%1=(%3);forward %1(%2);public %1(%2)
 #define g@n:%8$%1(%2)(%3) %8$forward tdd_%1(%2);public tdd_%1(%2)
 #define g@h:%8$%1(%2)(%3) %8$hook tdd_%1(%2)
+#define g@t:%8$%1(%2)(%3) %8$forward tdt_%1(%2);public tdt_%1(%2)
 
 #define d@%1\32; d@%1
 #define tdd_%1\32; tdd_%1
+#define tdt_%1\32; tdt_%1
 #define @yH_tdd_%1\32; @yH_tdd_%1
 
 // alternative syntax
 #define Dialog:%1(%2) dialog %1(%2)
 #define DialogResponse Dialog
 
+#define dtempl dialog [template]
+#define Dialog_Open OpenDialog
+#define Dialog_Close CloseDialog
+#define Dialog_Show ShowDialog
 
 #if !defined _INC_SAMP_Community_fixes && !defined FIX_const
 	native TDW_DIALOG_ShowPlayerDialog(playerid, dialogid, style,
@@ -116,9 +123,17 @@ stock CloseDialog(playerid)
 		space, space);
 }
 
-stock IsDialogOpen(playerid)
+stock IsPlayerInDialog(playerid)
 {
 	return TDW_gsDialogOpened{playerid};
+}
+
+stock ShowDialog(playerid, const func[])
+{
+	new buffer[TDW_DIALOG_MAX_FUNC_NAME char] = !"tdt_";
+	strcat(buffer, func);
+
+	return CallLocalFunction(buffer, !"d", playerid);
 }
 
 
