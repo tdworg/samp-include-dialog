@@ -15,7 +15,7 @@ dtempl register(playerid)
 
 public OnPlayerConnect(playerid)
 {
-	OpenDialog(playerid, "register", DIALOG_STYLE_MSGBOX,
+	OpenDialog(playerid, dfunc:register, DIALOG_STYLE_MSGBOX,
 		"Register",
 		"Hello!",
 		"Register", "Cancel"
