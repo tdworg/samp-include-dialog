@@ -74,9 +74,12 @@
 #endif
 
 
+#if !defined TDW_DIALOG_ID
+	#define TDW_DIALOG_ID (32767)
+#endif
+
 const
-	TDW_DIALOG_MAX_FUNC_NAME = 32,
-	TDW_DIALOG_ID = 32767;
+	TDW_DIALOG_MAX_FUNC_NAME = 32;
 
 static stock
 	TDW_gsDialogName[MAX_PLAYERS][TDW_DIALOG_MAX_FUNC_NAME char];
