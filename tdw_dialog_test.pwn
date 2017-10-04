@@ -13,7 +13,9 @@ DialogResponse: name(playerid, response, listitem, inputtext[])
 {}
 
 public OnFilterScriptInit()
-{}
+{
+	return 1;
+}
 
 public OnPlayerCommandText(playerid, cmdtext[])
 {
@@ -29,7 +31,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 }
 
 
-// public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
-// {
+public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
+{
 
-// }
+}
