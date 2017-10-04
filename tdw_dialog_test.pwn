@@ -1,14 +1,15 @@
 #include <a_samp>
 
 #include <ysi\y_hooks>
+#define TDW_DIALOG_DEFAULT_HOOK
 #include <dialog/tdw_dialog>
 
-dialog [hook] abc(playerid, response, listitem, inputtext[])
+dialog [nohook] abc(playerid, response, listitem, inputtext[])
 {
 	printf("Called");
 }
 
-DialogResponse: [] name(playerid, response, listitem, inputtext[])
+DialogResponse: name(playerid, response, listitem, inputtext[])
 {}
 
 public OnFilterScriptInit()

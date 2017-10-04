@@ -29,11 +29,10 @@
 	#define TDW_DIALOG_SUPPORT_Y_HOOKS
 #endif
 
-
 #define u@$ 0]);
 #define __:%0$ u@(u[_:%0 u@$
 
-#define dialog%1(%2) __:a@g:f@g:g@n:$%1(%2)()
+#define dialog%1(%2) __:a@g:f@g:g@g:$%1(%2)()
 
 #define a@g a@m:a@o:a@n
 #define a@m:%8$%0[%3,%4]%1(%2) a@g:r@%3:%8$%0[%4]%1(%2)
@@ -46,9 +45,15 @@
 #else
 	#define r@hook g@n
 #endif
+#define r@nohook g@n
 
 // #define f@g:%8$%0<%3>%1(%2)() g@v:%8$%0%1(%2)(%3)
 
+#if defined TDW_DIALOG_SUPPORT_Y_HOOKS && defined TDW_DIALOG_DEFAULT_HOOK
+	#define g@g g@h
+#else
+	#define g@g g@n
+#endif
 // #define g@v:%8$%1(%2)(%3) %8$public const d@%1=(%3);forward %1(%2);public %1(%2)
 #define g@n:%8$%1(%2)(%3) %8$forward tdd_%1(%2);public tdd_%1(%2)
 #define g@h:%8$%1(%2)(%3) %8$hook tdd_%1(%2)
