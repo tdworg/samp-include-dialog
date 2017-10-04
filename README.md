@@ -1,9 +1,10 @@
+
+
 # TDW Dialogs
 
-### About the library
-Dialogs!
+The library provides a new syntax for handling dialog responses.
 
-### Installation
+## Installation
 1. Download library.
 2. All files move into folder `pawno/includes`. But, you can use the flag `-i<path>` to specify an alternative path.
 3. Include it:
@@ -17,41 +18,20 @@ Dialogs!
 #include <a_samp>
 #include <tdw_dialog>
 
-
-dialog RegisterPlayerDialog(playerid, response, inputtext[])
+dialog register(playerid, response, listitem, inputtext[])
 {
-	if (response) {
-		SendClientMessage(playerid, -1,
-			!"Ок!"
-		);
-	} else {
-		Dialog_Show(playerid, dfunc:RegisterPlayerDialog);
-	}
-	return 1;
+	if (!response)
+		return;
+	SendClientMessage(playerid, -1, "Registred");
 }
 
-dtempl RegisterPlayerDialog(playerid)
+public OnPlayerConnect(playerid)
 {
-	const SOME_STRING = 50;
-	static buffer[SOME_STRING];
-	GetPlayerName(playerid, buffer, MAX_PLAYER_NAME + 1);
-	format(buffer, sizeof buffer, "Hello! %s", buffer);
-	Dialog_Open(playerid, dfunc:RegisterPlayerDialog, DIALOG_STYLE_INPUT,
-		buffer, !"Ok? or not?",
-		!"Ok!", !"No!"
+	OpenDialog(playerid, "register", DIALOG_STYLE_MSGBOX,
+		"Register",
+		"Hello!",
+		"Register", "Cancel"
 	);
+
 	return 1;
 }
-
-
-public
-	OnPlayerConnect(playerid)
-{
-	Dialog_Show(playerid, dfunc:RegisterPlayerDialog);
-	return 1;
-}
-```
-
-### Branching
-
-#![Branching](doc/img/branching.png)
