@@ -113,6 +113,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 #endif
 {
 	static ret;
+	#pragma unused ret
 	if (dialogid == TDW_DIALOG_ID) {
 		if (inputtext[0] == '\0') {
 			CallLocalFunction(TDW_gsDialogName[playerid], !"ddds", playerid,
