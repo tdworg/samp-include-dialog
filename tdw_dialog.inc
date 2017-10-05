@@ -56,12 +56,23 @@
 	#define g@g g@n
 #endif
 // #define g@v:%8$%1(%2)(%3) %8$public const d@%1=(%3);forward %1(%2);public %1(%2)
-#define g@n:%8$%1(%2)(%3) %8$forward D_%1(%2);public D_%1(%2)
-#define g@h:%8$%1(%2)(%3) %8$hook D_%1(%2)
+#if defined TDW_DIALOG_SKIP_ARGS
+	#define g@n:%8$%1(%2)(%3) %8$forward D_%1(playerid, response, listitem, inputtext[]);\
+ 								public D_%1(playerid, response, listitem, inputtext[]){(_:ar@:(D@%1(%2)));}\
+ 								stock D@%1(%2)
+	#define g@h:%8$%1(%2)(%3) %8$hook D_%1(playerid, response, listitem, inputtext[]){(_:ar@:(D@%1(%2)));}\
+ 								stock D@%1(%2)
+
+ 	#define ar@:(%1(%2[%4]%3)) ar@:(%1(%2%3))
+#else
+	#define g@n:%8$%1(%2)(%3) %8$forward D_%1(%2);public D_%1(%2)
+	#define g@h:%8$%1(%2)(%3) %8$hook D_%1(%2)
+#endif
 #define g@t:%8$%1(%2)(%3) %8$forward T_%1(%2);public T_%1(%2)
 
 #define d@%1\32; d@%1
 #define D_%1\32; D_%1
+#define D@%1\32; D@%1
 #define T_%1\32; T_%1
 #define @yH_D_%1\32; @yH_D_%1
 
