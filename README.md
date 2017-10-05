@@ -1,6 +1,4 @@
-
-
-# TDW Dialogs
+# TDW Dialog
 
 The library provides a new syntax for handling dialog responses.
 
