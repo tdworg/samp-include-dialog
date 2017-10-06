@@ -57,12 +57,15 @@
 #endif
 // #define g@v:%8$%1(%2)(%3) %8$public const d@%1=(%3);forward %1(%2);public %1(%2)
 #if defined TDW_DIALOG_SKIP_ARGS
-	#define g@n:%8$%1(%2)(%3) %8$forward D_%1(playerid, response, listitem, inputtext[]);\
- 								public D_%1(playerid, response, listitem, inputtext[]){(_:ar@:(D@%1(%2)));}\
- 								stock D@%1(%2)
-	#define g@h:%8$%1(%2)(%3) %8$hook D_%1(playerid, response, listitem, inputtext[]){(_:ar@:(D@%1(%2)));}\
- 								stock D@%1(%2)
-
+	#define g@n:%8$%1(%2)(%3) %8$\
+ 		forward D_%1(playerid,response,listitem,inputtext[]);\
+ 		public D_%1(playerid,response,listitem,inputtext[])\
+ 		{(_:ar@:(D@%1(%2)));}\
+ 		stock D@%1(%2)
+	#define g@h:%8$%1(%2)(%3) %8$\
+ 		hook D_%1(playerid,response,listitem,inputtext[])\
+ 		{(_:ar@:(D@%1(%2)));}\
+ 		stock D@%1(%2)
  	#define ar@:(%1(%2[%4]%3)) ar@:(%1(%2%3))
 #else
 	#define g@n:%8$%1(%2)(%3) %8$forward D_%1(%2);public D_%1(%2)
@@ -179,8 +182,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	}
 
 #if !defined TDW_DIALOG_SUPPORT_Y_HOOKS && defined TDW_DLG@OnDialogResponse
-	TDW_DLG@OnDialogResponse(playerid, dialogid, response, listitem, inputtext);
-	// this workaround is used to get the return value of TDW_DLG@OnDialogResponse.
+	TDW_DLG@OnDialogResponse(playerid, dialogid, response, listitem,
+		inputtext);
+	// this workaround is used to get the return value of
+	// TDW_DLG@OnDialogResponse.
 	#emit stor.pri ret
 	return ret;
 #else
